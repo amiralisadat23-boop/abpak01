@@ -1,0 +1,257 @@
+{% extends "base.html" %}
+{% load shop_tags %}
+
+{% block title %}{{ product.name }} | آب پاک{% endblock %}
+
+{% block content %}
+<div class="container">
+  <nav class="breadcrumb" aria-label="مسیر صفحه">
+    <a href="{% url 'shop:home' %}">خانه</a>
+    <svg class="icon" aria-hidden="true"><use href="#i-chevron-left"></use></svg>
+    <a href="{% url 'shop:catalog' %}">محصولات</a>
+    <svg class="icon" aria-hidden="true"><use href="#i-chevron-left"></use></svg>
+    <a href="{{ product.category.get_absolute_url }}">{{ product.category.name }}</a>
+    <svg class="icon" aria-hidden="true"><use href="#i-chevron-left"></use></svg>
+    <span class="breadcrumb__current">{{ product.name|truncatechars:52 }}</span>
+  </nav>
+
+  <div class="product-detail">
+    <!-- گالری -->
+    <div class="gallery" data-gallery>
+      <div class="gallery__main">
+        <div class="gallery__badge">
+          {% if product.has_discount %}<span class="badge badge--discount">{{ product.discount_percent|fa }}٪ تخفیف</span>{% endif %}
+          {% if product.is_featured %}<span class="badge badge--featured">پیشنهاد آب پاک</span>{% endif %}
+        </div>
+        {% if product.main_image %}
+          <img src="{{ product.main_image.image.url }}" alt="{{ product.main_image.alt|default:product.name }}" data-gallery-main width="800" height="800" fetchpriority="high" decoding="async">
+        {% else %}
+          {% include "partials/product_placeholder.html" %}
+          <span class="gallery__hint">
+            <svg class="icon" aria-hidden="true"><use href="#i-info"></use></svg>
+            تصویر این محصول به‌زودی تکمیل می‌شود.
+          </span>
+        {% endif %}
+      </div>
+
+      {% if product.images.all %}
+        <div class="gallery__thumbs">
+          {% for image in product.images.all %}
+            <button type="button" class="gallery__thumb {% if image.is_primary or forloop.first %}is-active{% endif %}"
+                    data-gallery-thumb data-src="{{ image.image.url }}" aria-label="تصویر {{ forloop.counter }}">
+              <img src="{{ image.image.url }}" alt="{{ image.alt|default:product.name }}" loading="lazy" decoding="async">
+            </button>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- اطلاعات -->
+    <div class="product-info">
+      <div class="product-info__top">
+        <a class="product-info__cat" href="{{ product.category.get_absolute_url }}">
+          <svg class="icon" aria-hidden="true"><use href="#i-{{ product.category.icon }}"></use></svg>
+          {{ product.category.name }}
+        </a>
+        <span class="product-card__stock{% if not product.in_stock %} product-card__stock--out{% elif product.stock <= 3 %} product-card__stock--low{% endif %}">
+          {% if not product.in_stock %}ناموجود در انبار
+          {% elif product.stock <= 3 %}تنها {{ product.stock|fa }} عدد در انبار
+          {% else %}موجود در انبار{% endif %}
+        </span>
+      </div>
+
+      <h1 class="product-info__title">{{ product.name }}</h1>
+      {% if product.short_description %}<p class="product-info__short">{{ product.short_description }}</p>{% endif %}
+
+      <div class="product-info__meta">
+        {% if product.brand %}<span>برند: <strong>{{ product.brand.name }}</strong></span>{% endif %}
+        <span>کد کالا: <strong>{{ product.sku }}</strong></span>
+        <span>دسته: <strong>{{ product.category.name }}</strong></span>
+      </div>
+
+      <div class="price-panel">
+        <div class="price-panel__row">
+          <div>
+            <div class="price-panel__label">قیمت فروش</div>
+            <div class="price-panel__now">{{ product.price|price }}<small>تومان</small></div>
+            {% if product.has_discount %}
+              <div style="display: flex; align-items: center; gap: 8px; margin-top: 4px;">
+                <span class="price-panel__old">{{ product.old_price|price }} تومان</span>
+                <span class="price-panel__saving">
+                  <svg class="icon" aria-hidden="true"><use href="#i-percent"></use></svg>
+                  {{ product.saving|price }} تومان صرفه‌جویی
+                </span>
+              </div>
+            {% endif %}
+          </div>
+          <div style="text-align: end;">
+            <div class="price-panel__label">ارسال و پرداخت</div>
+            <div class="price-panel__warranty">
+              <svg class="icon" aria-hidden="true"><use href="#i-truck"></use></svg>
+              ارسال از تهران، ۲ تا ۴ روز کاری
+            </div>
+            <div class="price-panel__warranty" style="margin-top: 6px;">
+              <svg class="icon" aria-hidden="true"><use href="#i-credit-card"></use></svg>
+              پرداخت در محل یا انتقال بانکی
+            </div>
+          </div>
+        </div>
+        <div class="price-panel__stock">
+          <span class="stock-state{% if not product.in_stock %} stock-state--out{% elif product.stock <= 3 %} stock-state--low{% endif %}">
+            {% if product.in_stock %}آماده ارسال از انبار{% else %}در حال تأمین موجودی{% endif %}
+          </span>
+          <span class="price-panel__warranty">
+            <svg class="icon" aria-hidden="true"><use href="#i-shield"></use></svg>
+            {{ product.warranty|default:"ضمانت اصالت کالا" }}
+          </span>
+        </div>
+      </div>
+
+      <form method="post" action="{% url 'shop:cart_add' %}" data-add-to-cart class="buy-form">
+        {% csrf_token %}
+        <input type="hidden" name="product_id" value="{{ product.id }}">
+        <input type="hidden" name="next" value="{{ product.get_absolute_url }}">
+
+        <div class="buy-box">
+          <div class="qty" data-qty data-max="{{ product.stock }}">
+            <button type="button" class="qty__btn" data-qty-minus aria-label="کاهش تعداد">
+              <svg class="icon" aria-hidden="true"><use href="#i-minus"></use></svg>
+            </button>
+            <input class="qty__value" type="number" name="quantity" value="{{ cart_quantity|default:1 }}" min="1" max="{{ product.stock }}" step="1" aria-label="تعداد محصول" {% if not product.in_stock %}disabled{% endif %} data-qty-input>
+            <button type="button" class="qty__btn" data-qty-plus aria-label="افزایش تعداد">
+              <svg class="icon" aria-hidden="true"><use href="#i-plus"></use></svg>
+            </button>
+          </div>
+
+          <button type="submit" class="btn btn--primary" {% if not product.in_stock %}disabled{% endif %}>
+            <svg class="icon" aria-hidden="true"><use href="#i-cart"></use></svg>
+            {% if product.in_stock %}افزودن به سبد خرید{% else %}ناموجود{% endif %}
+          </button>
+          <button type="submit" name="redirect_to" value="checkout" class="btn btn--outline" {% if not product.in_stock %}disabled{% endif %}>
+            خرید سریع
+            <svg class="icon" aria-hidden="true"><use href="#i-arrow-left"></use></svg>
+          </button>
+          <a class="btn btn--ghost btn--icon" href="tel:{{ STORE.phone_raw }}" title="مشاوره تلفنی خرید" aria-label="مشاوره تلفنی خرید">
+            <svg class="icon" aria-hidden="true"><use href="#i-headset"></use></svg>
+          </a>
+        </div>
+      </form>
+
+      <ul class="feature-list">
+        <li><svg class="icon" aria-hidden="true"><use href="#i-shield"></use></svg> ضمانت اصالت و سلامت فیزیکی کالا</li>
+        <li><svg class="icon" aria-hidden="true"><use href="#i-truck"></use></svg> ارسال به سراسر ایران</li>
+        <li><svg class="icon" aria-hidden="true"><use href="#i-refresh"></use></svg> امکان تعویض در صورت مغایرت</li>
+        <li><svg class="icon" aria-hidden="true"><use href="#i-headset"></use></svg> مشاوره فنی پیش و پس از خرید</li>
+      </ul>
+
+      <div class="meta-list">
+        {% if product.brand %}
+          <div class="meta-list__row">
+            <svg class="icon" aria-hidden="true"><use href="#i-award"></use></svg>
+            <span>برند تولیدکننده: <strong>{{ product.brand.name }}</strong>{% if product.brand.country %} ({{ product.brand.country }}){% endif %}</span>
+          </div>
+        {% endif %}
+        {% if product.application %}
+          <div class="meta-list__row">
+            <svg class="icon" aria-hidden="true"><use href="#i-droplet"></use></svg>
+            <span>کاربرد محصول: <strong>{{ product.application }}</strong></span>
+          </div>
+        {% endif %}
+        {% if product.compatible_with %}
+          <div class="meta-list__row">
+            <svg class="icon" aria-hidden="true"><use href="#i-wrench"></use></svg>
+            <span>دستگاه سازگار: <strong>{{ product.compatible_with }}</strong></span>
+          </div>
+        {% endif %}
+        {% if product.warranty %}
+          <div class="meta-list__row">
+            <svg class="icon" aria-hidden="true"><use href="#i-shield"></use></svg>
+            <span>شرایط گارانتی: <strong>{{ product.warranty }}</strong></span>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- تب‌ها -->
+  <div class="product-tabs" data-tabs>
+    <div class="tabs__nav" role="tablist" aria-label="اطلاعات محصول">
+      <button type="button" class="tabs__btn is-active" data-tab-target="desc" role="tab" aria-selected="true">
+        <svg class="icon" aria-hidden="true"><use href="#i-file"></use></svg>
+        توضیحات کامل
+      </button>
+      <button type="button" class="tabs__btn" data-tab-target="specs" role="tab" aria-selected="false">
+        <svg class="icon" aria-hidden="true"><use href="#i-sliders"></use></svg>
+        مشخصات فنی
+      </button>
+      <button type="button" class="tabs__btn" data-tab-target="shipping" role="tab" aria-selected="false">
+        <svg class="icon" aria-hidden="true"><use href="#i-truck"></use></svg>
+        ارسال و گارانتی
+      </button>
+    </div>
+
+    <div class="tabs__panel is-active" data-tab-panel="desc" role="tabpanel">
+      <div class="prose">
+        {{ product.description|linebreaks }}
+        <div class="legal-note">
+          <svg class="icon" aria-hidden="true"><use href="#i-info"></use></svg>
+          <span>تصاویر و مشخصات این صفحه جنبه راهنما دارند؛ در صورت تغییر تولیدکننده، ممکن است جزئیات ظاهری کالا متفاوت باشد. برای اطمینان از سازگاری، پیش از خرید مشاوره بگیرید.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tabs__panel" data-tab-panel="specs" role="tabpanel">
+      {% if specs %}
+        <dl class="spec-table">
+          {% for spec in specs %}
+            <div class="spec-row">
+              <dt>{{ spec.label }}</dt>
+              <dd>{{ spec.value }}</dd>
+            </div>
+          {% endfor %}
+          <div class="spec-row">
+            <dt>کد کالا</dt>
+            <dd>{{ product.sku }}</dd>
+          </div>
+        </dl>
+      {% else %}
+        <p class="prose">مشخصات فنی تفصیلی برای این محصول ثبت نشده است. برای دریافت اطلاعات دقیق با پشتیبانی تماس بگیرید.</p>
+      {% endif %}
+    </div>
+
+    <div class="tabs__panel" data-tab-panel="shipping" role="tabpanel">
+      <div class="prose">
+        <h3>شرایط گارانتی</h3>
+        <p>{{ product.warranty|default:"این کالا با ضمانت اصالت و سلامت فیزیکی عرضه می‌شود." }}</p>
+        <h3>ارسال کالا</h3>
+        <p>سفارش‌های تهران با پیک اختصاصی و سفارش‌های سایر شهرها با پست پیشتاز ارسال می‌شوند. کالاهای حجیم مانند دستگاه صنعتی و مخزن بزرگ با باربری ارسال می‌شوند.</p>
+        <p>بسته‌بندی ضدضربه و بررسی سلامت کالا پیش از ارسال انجام می‌شود. در صورت آسیب ظاهری در زمان تحویل، مرسوله را تحویل نگیرید و با پشتیبانی تماس بگیرید.</p>
+        <h3>خدمات پس از فروش</h3>
+        <p>راهنمای نصب، زمان‌بندی تعویض فیلتر و پشتیبانی فنی تلفنی برای محصولات آب پاک ارائه می‌شود.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% if related_products %}
+  <section class="section section--alt">
+    <div class="container">
+      <div class="section__head">
+        <div>
+          <span class="eyebrow">محصولات مرتبط</span>
+          <h2 class="section__title">در همین دسته <span>ببینید</span></h2>
+        </div>
+        <a class="link-more" href="{{ product.category.get_absolute_url }}">
+          همه {{ product.category.name }}
+          <svg class="icon" aria-hidden="true"><use href="#i-arrow-left"></use></svg>
+        </a>
+      </div>
+      <div class="product-grid">
+        {% for related in related_products %}
+          {% include "partials/product_card.html" with product=related %}
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+{% endif %}
+{% endblock %}

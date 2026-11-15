@@ -1,0 +1,297 @@
+"""
+تنظیمات پروژه فروشگاه اینترنتی آب پاک (ABPAK)
+"""
+import os
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+
+def load_env_file(path: Path) -> None:
+    """خواندن متغیرها از فایل .env ریشه پروژه (بدون وابستگی اضافه).
+
+    متغیرهایی که از قبل در محیط سیستم تعیین شده‌اند اولویت دارند و بازنویسی نمی‌شوند،
+    بنابراین تنظیمات پروداکشن همیشه بر محتوای فایل .env مقدم است.
+    """
+    if not path.exists():
+        return
+    for raw_line in path.read_text(encoding="utf-8").splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        key = key.strip()
+        if key.startswith("export "):
+            key = key[len("export ") :].strip()
+        value = value.strip()
+        if len(value) >= 2 and value[0] == value[-1] and value[0] in ("\"", "'"):
+            value = value[1:-1]
+        if key:
+            os.environ.setdefault(key, value)
+
+
+load_env_file(BASE_DIR / ".env")
+
+
+def env_list(name: str, default: str = "") -> list[str]:
+    raw = os.environ.get(name, default)
+    return [item.strip() for item in raw.split(",") if item.strip()]
+
+
+SECRET_KEY = os.environ.get(
+    "DJANGO_SECRET_KEY",
+    "django-insecure-abpak-dev-only-key-change-me-in-production-9f2c7a",
+)
+
+DEBUG = os.environ.get("DJANGO_DEBUG", "1") == "1"
+
+ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS", "*") if DEBUG else env_list("DJANGO_ALLOWED_HOSTS")
+
+INSTALLED_APPS = [
+    "whitenoise.runserver_nostatic",
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "django.contrib.humanize",
+    "shop",
+]
+
+MIDDLEWARE = [
+    "django.middleware.gzip.GZipMiddleware",
+    "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
+    "shop.middleware.StaticCacheMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.locale.LocaleMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
+]
+
+ROOT_URLCONF = "config.urls"
+
+TEMPLATES = [
+    {
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [BASE_DIR / "templates"],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
+                "shop.context_processors.store",
+            ],
+        },
+    },
+]
+
+WSGI_APPLICATION = "config.wsgi.application"
+ASGI_APPLICATION = "config.asgi.application"
+
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
+    }
+}
+
+AUTH_PASSWORD_VALIDATORS = [
+    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
+    {
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+        "OPTIONS": {"min_length": 8},
+    },
+    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
+    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
+]
+
+LANGUAGE_CODE = "fa-ir"
+TIME_ZONE = "Asia/Tehran"
+USE_I18N = True
+USE_TZ = True
+
+STATIC_URL = "/static/"
+STATICFILES_DIRS = [BASE_DIR / "static"]
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
+
+# فشرده‌سازی و کش فایل‌های استاتیک (در development از finders استفاده می‌شود)
+WHITENOISE_USE_FINDERS = DEBUG
+WHITENOISE_AUTOREFRESH = DEBUG
+WHITENOISE_MAX_AGE = 60 * 60 * 24 * 30
+# در پروداکشن اگر collectstatic اجرا نشده باشد، به‌جای خطای 500 فایل اصلی سرو می‌شود.
+WHITENOISE_MANIFEST_STRICT = False
+
+# ---------------------------------------------------------------------------
+# کش
+# پیش‌فرض LocMemCache است (به ازای هر پروسه). برای استقرار چند-پروسه‌ای
+# می‌توانید بدون تغییر کد، بک‌اند را با متغیرهای محیطی عوض کنید (مثلا Redis).
+# ---------------------------------------------------------------------------
+CACHES = {
+    "default": {
+        "BACKEND": os.environ.get(
+            "CACHE_BACKEND", "django.core.cache.backends.locmem.LocMemCache"
+        ),
+        "LOCATION": os.environ.get("CACHE_LOCATION", "abpak-local"),
+        "TIMEOUT": int(os.environ.get("CACHE_TIMEOUT", "900")),
+    }
+}
+
+# ---------------------------------------------------------------------------
+# ذخیره‌سازی فایل‌های استاتیک
+# در پروداکشن WhiteNoise فایل‌ها را gzip/brotli می‌کند و نام هش‌دار می‌دهد
+# (کش یک‌ساله در مرورگر). نیازمند `manage.py collectstatic` است.
+# ---------------------------------------------------------------------------
+if DEBUG:
+    STORAGES = {
+        "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+        "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
+    }
+else:
+    STORAGES = {
+        "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+        "staticfiles": {
+            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"
+        },
+    }
+
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+LOGIN_URL = "shop:login"
+LOGIN_REDIRECT_URL = "shop:account"
+LOGOUT_REDIRECT_URL = "shop:home"
+
+SESSION_COOKIE_AGE = 60 * 60 * 24 * 30
+SESSION_SAVE_EVERY_REQUEST = False
+
+# دامنه‌هایی که فرم‌های POST از آن‌ها پذیرفته می‌شود (پیش‌نمایش ابری + دامنه اصلی)
+CSRF_TRUSTED_ORIGINS = [
+    "https://*.style.dev",
+    "https://abpak.ir",
+    "https://www.abpak.ir",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+] + env_list("DJANGO_CSRF_TRUSTED_ORIGINS")
+
+CSRF_COOKIE_HTTPONLY = False
+X_FRAME_OPTIONS = "SAMEORIGIN"
+
+# ---------------------------------------------------------------------------
+# تنظیمات اختصاصی فروشگاه
+# ---------------------------------------------------------------------------
+SITE_NAME = "آب پاک"
+SITE_NAME_EN = "ABPAK"
+SITE_TAGLINE = "تجهیزات تصفیه آب خانگی و صنعتی"
+SITE_PHONE = "۰۲۱-۹۱۰۰۴۵۶۷"
+SITE_PHONE_RAW = "02191004567"
+SITE_MOBILE = "۰۹۱۲۳۴۵۶۷۸۹"
+SITE_EMAIL = "info@abpak.ir"
+SITE_ADDRESS = "تهران، خیابان ولیعصر، بالاتر از میدان ونک، برج آبان، طبقه ۵، واحد ۱۲"
+SITE_WORKING_HOURS = "شنبه تا پنجشنبه، ۹ صبح تا ۹ شب"
+SITE_TAPSI_SHOP = "https://tapsi.shop/store/1439158740070203392/HIT759060"
+SITE_INSTAGRAM = "https://instagram.com/"
+SITE_TELEGRAM = "https://t.me/"
+SITE_WHATSAPP = "https://wa.me/989123456789"
+
+SHIPPING_METHODS = {
+    "post": {
+        "label": "پست پیشتاز",
+        "description": "ارسال به تمام نقاط کشور، ۲ تا ۴ روز کاری",
+        "cost": 89_000,
+    },
+    "peyk": {
+        "label": "پیک اختصاصی تهران",
+        "description": "تحویل در همان روز برای سفارش‌های ثبت‌شده تا ساعت ۱۲",
+        "cost": 149_000,
+    },
+    "freight": {
+        "label": "باربری (کالای حجیم)",
+        "description": "مناسب دستگاه‌های صنعتی و مخازن بزرگ، هزینه بر اساس مقصد",
+        "cost": 250_000,
+    },
+}
+FREE_SHIPPING_THRESHOLD = 5_000_000
+DEFAULT_SHIPPING_METHOD = "post"
+
+# ---------------------------------------------------------------------------
+# پرداخت آنلاین (ماژول shop/payments)
+# پیش‌فرض روی حالت sandbox زرین‌پال است تا بدون پول واقعی قابل تست باشد:
+#   ZARINPAL_SANDBOX=1  → آدرس‌های sandbox.zarinpal.com
+#   ZARINPAL_MERCHANT_ID → در سایت تست، هر UUID دلخواه ۳۶ کاراکتری قبول است
+# برای پرداخت واقعی: ZARINPAL_SANDBOX=0 و merchant id واقعی از پنل زرین‌پال.
+# هیچ کلیدی در کد یا قالب نوشته نمی‌شود؛ فقط از متغیر محیطی خوانده می‌شود.
+# ---------------------------------------------------------------------------
+PAYMENT_GATEWAY = os.environ.get("PAYMENT_GATEWAY", "zarinpal")
+PAYMENT_GATEWAY_ENABLED = os.environ.get("PAYMENT_GATEWAY_ENABLED", "1") == "1"
+
+ZARINPAL_MERCHANT_ID = os.environ.get(
+    "ZARINPAL_MERCHANT_ID", "00000000-0000-0000-0000-000000000000"
+).strip()
+ZARINPAL_SANDBOX = os.environ.get("ZARINPAL_SANDBOX", "1") == "1"
+ZARINPAL_TIMEOUT = int(os.environ.get("ZARINPAL_TIMEOUT", "12"))
+
+PAYMENT_METHODS = {}
+if PAYMENT_GATEWAY_ENABLED:
+    PAYMENT_METHODS["online"] = {
+        "label": "پرداخت آنلاین (درگاه زرین‌پال)",
+        "description": "انتقال امن به درگاه بانکی؛ در حالت آزمایشی مبلغی از حساب شما کم نمی‌شود",
+    }
+PAYMENT_METHODS.update(
+    {
+        "cod": {
+            "label": "پرداخت در محل (هنگام تحویل)",
+            "description": "پرداخت نقدی یا کارت‌خوان هنگام تحویل کالا",
+        },
+        "transfer": {
+            "label": "کارت به کارت / انتقال بانکی",
+            "description": "شماره کارت پس از ثبت سفارش توسط پشتیبانی برای شما ارسال می‌شود",
+        },
+    }
+)
+
+PRODUCTS_PER_PAGE = 12
+
+MESSAGE_STORAGE = "django.contrib.messages.storage.session.SessionStorage"
+
+# ---------------------------------------------------------------------------
+# کارهای پس‌زمینه (Celery + Redis)
+# در docker-compose سرویس‌های web/worker/beat همین ایمیج را اجرا می‌کنند و
+# آدرس بروکر با متغیرهای محیطی روی سرویس redis تنظیم می‌شود.
+# سلری فقط با اجرای worker لازم است؛ خود سایت به آن وابسته نیست.
+# ---------------------------------------------------------------------------
+CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL", "redis://127.0.0.1:6379/0")
+CELERY_RESULT_BACKEND = os.environ.get("CELERY_RESULT_BACKEND", CELERY_BROKER_URL)
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TIMEZONE = TIME_ZONE
+CELERY_ENABLE_UTC = True
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 10 * 60
+CELERY_TASK_SOFT_TIME_LIMIT = 9 * 60
+# با بالا آمدن ورکر، تا در دسترس بودن بروکر تلاش مجدد می‌کند (رفتار جدید سلری 6)
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+
+CELERY_BEAT_SCHEDULE = {
+    # هر شب نشست‌های منقضی‌شده پاک می‌شوند (سرویس beat)
+    "clear-expired-sessions": {
+        "task": "shop.tasks.clear_expired_sessions",
+        "schedule": 60 * 60 * 24,
+    },
+}
+
+if not DEBUG:
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True

@@ -1,0 +1,52 @@
+{% extends "panel/base.html" %}
+{% load shop_tags %}
+
+{% block content %}
+<div class="p-card">
+  <div class="p-card__head">
+    <h2>سفارش‌ها</h2>
+    <span class="p-muted">{{ page_obj.paginator.count|fa }} سفارش</span>
+  </div>
+
+  <div class="p-chips">
+    <a class="p-chip {% if not status %}is-active{% endif %}" href="{% url 'panel:orders' %}">همه</a>
+    {% for key, label in status_choices %}
+      <a class="p-chip {% if status == key %}is-active{% endif %}" href="?status={{ key }}">{{ label }}</a>
+    {% endfor %}
+  </div>
+
+  <form class="p-toolbar" method="get">
+    {% if status %}<input type="hidden" name="status" value="{{ status }}">{% endif %}
+    <input class="field__input" type="search" name="q" value="{{ q }}" placeholder="کد سفارش، نام یا شماره تماس…">
+    <button class="btn btn--primary btn--sm" type="submit">جستجو</button>
+  </form>
+
+  <div class="p-table-wrap">
+    <table class="p-table">
+      <thead><tr><th>کد سفارش</th><th>مشتری</th><th>مبلغ کل</th><th>پرداخت</th><th>وضعیت</th><th></th></tr></thead>
+      <tbody>
+        {% for order in orders %}
+          <tr>
+            <td><span class="p-code">{{ order.code }}</span><small>{{ order.created_at|jalali }}</small></td>
+            <td>{{ order.full_name }}<small>{{ order.phone|fa }}</small></td>
+            <td>{{ order.total|price }} <small>تومان</small></td>
+            <td>{{ order.get_payment_status_display }}</td>
+            <td><span class="p-badge p-badge--{{ order.status }}">{{ order.get_status_display }}</span></td>
+            <td><a class="p-link" href="{% url 'panel:order_edit' order.code %}">جزئیات</a></td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="6" class="p-empty">سفارشی مطابق فیلتر پیدا نشد.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if page_obj.has_other_pages %}
+    <div class="p-pagination">
+      {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}{% if status %}&status={{ status }}{% endif %}{% if q %}&q={{ q }}{% endif %}">قبلی</a>{% endif %}
+      <span>صفحه {{ page_obj.number|fa }} از {{ page_obj.paginator.num_pages|fa }}</span>
+      {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}{% if status %}&status={{ status }}{% endif %}{% if q %}&q={{ q }}{% endif %}">بعدی</a>{% endif %}
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

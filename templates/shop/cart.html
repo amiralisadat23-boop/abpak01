@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+{% load shop_tags %}
+
+{% block content %}
+<div class="page-head">
+  <div class="container">
+    <nav class="breadcrumb" aria-label="مسیر صفحه">
+      <a href="{% url 'shop:home' %}">خانه</a>
+      <svg class="icon" aria-hidden="true"><use href="#i-chevron-left"></use></svg>
+      <span class="breadcrumb__current">سبد خرید</span>
+    </nav>
+    <h1 class="page-head__title">سبد خرید شما</h1>
+    <p class="page-head__desc">تعداد اقلام، قیمت‌ها و هزینه ارسال به‌صورت خودکار محاسبه می‌شوند. پیش از تکمیل سفارش، تعداد محصولات را بررسی کنید.</p>
+  </div>
+</div>
+
+<div class="container">
+  {% if cart_items %}
+    <div class="cart-layout">
+      <div>
+        <div class="cart-card">
+          <div class="cart-card__head">
+            <span class="cart-card__title">
+              <svg class="icon" aria-hidden="true"><use href="#i-cart"></use></svg>
+              اقلام سبد خرید
+            </span>
+            <span class="cart-card__count">{{ totals.count|fa }} عدد کالا</span>
+          </div>
+
+          {% for item in cart_items %}
+            <div class="cart-item" data-cart-row data-product-id="{{ item.product.id }}">
+              <a class="cart-item__media" href="{{ item.product.get_absolute_url }}">
+                {% if item.product.main_image %}
+                  <img src="{{ item.product.main_image.image.url }}" alt="{{ item.product.name }}" loading="lazy">
+                {% else %}
+                  {% include "partials/product_placeholder.html" %}
+                {% endif %}
+              </a>
+
+              <div class="cart-item__body">
+                <span class="cart-item__cat">{{ item.product.category.name }}</span>
+                <h2 class="cart-item__title"><a href="{{ item.product.get_absolute_url }}">{{ item.product.name }}</a></h2>
+                <div class="cart-item__meta">
+                  <span>قیمت واحد: {{ item.unit_price|price }} تومان</span>
+                  {% if item.product.brand %}<span>برند: {{ item.product.brand.name }}</span>{% endif %}
+                  <span class="stock-state{% if item.product.stock <= 3 %} stock-state--low{% endif %}">
+                    {% if item.product.stock > 0 %}موجود{% else %}ناموجود{% endif %}
+                  </span>
+                </div>
+                <form method="post" action="{% url 'shop:cart_remove' %}" data-cart-remove>
+                  {% csrf_token %}
+                  <input type="hidden" name="product_id" value="{{ item.product.id }}">
+                  <button class="cart-item__remove" type="submit">
+                    <svg class="icon" aria-hidden="true"><use href="#i-trash"></use></svg>
+                    حذف از سبد
+                  </button>
+                </form>
+              </div>
+
+              <div class="cart-item__aside">
+                <div class="qty qty--sm">
+                  <form method="post" action="{% url 'shop:cart_update' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="product_id" value="{{ item.product.id }}">
+                    <input type="hidden" name="quantity" value="{{ item.quantity|add:'-1' }}">
+                    <button type="submit" class="qty__btn" aria-label="کاهش تعداد">
+                      <svg class="icon" aria-hidden="true"><use href="#i-minus"></use></svg>
+                    </button>
+                  </form>
+                  <input class="qty__value" type="text" value="{{ item.quantity|fa }}" readonly aria-label="تعداد {{ item.product.name }}" data-line-qty>
+                  <form method="post" action="{% url 'shop:cart_update' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="product_id" value="{{ item.product.id }}">
+                    <input type="hidden" name="quantity" value="{{ item.quantity|add:'1' }}">
+                    <button type="submit" class="qty__btn" aria-label="افزایش تعداد" {% if item.quantity >= item.product.stock %}disabled{% endif %}>
+                      <svg class="icon" aria-hidden="true"><use href="#i-plus"></use></svg>
+                    </button>
+                  </form>
+                </div>
+                <span class="cart-item__total" data-line-total>{{ item.total_price|price }}<small>تومان</small></span>
+              </div>
+            </div>
+          {% endfor %}
+
+          <div class="cart-note">
+            <svg class="icon" aria-hidden="true"><use href="#i-info"></use></svg>
+            <span>حداکثر تعداد قابل سفارش از هر محصول برابر موجودی انبار است. اگر تعداد به سقف موجودی برسد، سبد خرید به‌صورت خودکار اصلاح می‌شود.</span>
+          </div>
+        </div>
+
+        <div style="margin-top: 14px; display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap;">
+          <a class="back-link" href="{% url 'shop:catalog' %}">
+            <svg class="icon" aria-hidden="true"><use href="#i-arrow-right"></use></svg>
+            ادامه خرید
+          </a>
+          <a class="back-link" href="{% url 'shop:track_order' %}">پیگیری سفارش قبلی</a>
+        </div>
+      </div>
+
+      <aside class="cart-summary">
+        <h2 class="cart-summary__title">
+          <svg class="icon" aria-hidden="true"><use href="#i-file"></use></svg>
+          خلاصه سفارش
+        </h2>
+
+        <div class="summary-row">
+          <span>جمع کالاها ({{ totals.count|fa }} عدد)</span>
+          <strong>{{ totals.subtotal|price }} تومان</strong>
+        </div>
+        <div class="summary-row {% if totals.shipping == 0 %}summary-row--free{% endif %}">
+          <span>هزینه ارسال</span>
+          <strong data-summary-shipping>{% if totals.shipping == 0 %}رایگان{% else %}{{ totals.shipping|price }} تومان{% endif %}</strong>
+        </div>
+
+        {% if totals.free_shipping_remaining > 0 %}
+          <div class="free-shipping">
+            <svg class="icon" aria-hidden="true"><use href="#i-truck"></use></svg>
+            با {{ totals.free_shipping_remaining|price }} تومان خرید بیشتر، ارسال سفارش شما رایگان می‌شود.
+            <div class="free-shipping__bar">
+              <span style="width: {% widthratio totals.subtotal totals.shipping_threshold 100 %}%"></span>
+            </div>
+          </div>
+        {% else %}
+          <div class="free-shipping" style="border-color: rgba(26,143,97,.35);">
+            <svg class="icon" aria-hidden="true"><use href="#i-check-circle"></use></svg>
+            تبریک! ارسال این سفارش رایگان است.
+          </div>
+        {% endif %}
+
+        <div class="summary-row summary-row--total">
+          <span>مبلغ قابل پرداخت</span>
+          <strong data-summary-total>{{ totals.total|price }} تومان</strong>
+        </div>
+
+        <a class="btn btn--primary btn--block btn--lg" href="{% url 'shop:checkout' %}">
+          ادامه فرآیند خرید
+          <svg class="icon" aria-hidden="true"><use href="#i-arrow-left"></use></svg>
+        </a>
+
+        <ul class="summary-trust">
+          <li><svg class="icon" aria-hidden="true"><use href="#i-shield"></use></svg> ضمانت اصالت و سلامت کالا</li>
+          <li><svg class="icon" aria-hidden="true"><use href="#i-lock"></use></svg> اطلاعات شما فقط برای ارسال سفارش استفاده می‌شود</li>
+          <li><svg class="icon" aria-hidden="true"><use href="#i-headset"></use></svg> پشتیبانی {{ STORE.hours }}</li>
+        </ul>
+      </aside>
+    </div>
+
+    {% if recommended %}
+      <section class="section" style="padding-top: 10px;">
+        <div class="section__head">
+          <div>
+            <span class="eyebrow">تکمیل سبد خرید</span>
+            <h2 class="section__title">شاید این‌ها را هم <span>نیاز داشته باشید</span></h2>
+          </div>
+        </div>
+        <div class="product-grid">
+          {% for product in recommended %}
+            {% include "partials/product_card.html" with product=product %}
+          {% endfor %}
+        </div>
+      </section>
+    {% endif %}
+  {% else %}
+    <div class="empty" style="margin-block: 30px 70px;">
+      <span class="empty__icon"><svg class="icon" aria-hidden="true"><use href="#i-cart"></use></svg></span>
+      <h2 class="empty__title">سبد خرید شما خالی است</h2>
+      <p class="empty__desc">هنوز محصولی انتخاب نکرده‌اید. از دسته‌بندی‌های تخصصی تصفیه آب شروع کنید یا محصولات منتخب را ببینید.</p>
+      <div class="empty__actions">
+        <a class="btn btn--primary" href="{% url 'shop:catalog' %}">مشاهده محصولات</a>
+        <a class="btn btn--outline" href="{% url 'shop:category' 'filters-cartridges' %}">خرید فیلتر و کارتریج</a>
+      </div>
+    </div>
+
+    {% if recommended %}
+      <section class="section" style="padding-top: 0;">
+        <div class="section__head">
+          <div>
+            <span class="eyebrow">پیشنهاد آب پاک</span>
+            <h2 class="section__title">محصولات <span>پرفروش</span></h2>
+          </div>
+        </div>
+        <div class="product-grid">
+          {% for product in recommended %}
+            {% include "partials/product_card.html" with product=product %}
+          {% endfor %}
+        </div>
+      </section>
+    {% endif %}
+  {% endif %}
+</div>
+{% endblock %}

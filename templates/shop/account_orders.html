@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% load shop_tags %}
+
+{% block content %}
+<div class="page-head">
+  <div class="container">
+    <nav class="breadcrumb" aria-label="مسیر صفحه">
+      <a href="{% url 'shop:home' %}">خانه</a>
+      <svg class="icon" aria-hidden="true"><use href="#i-chevron-left"></use></svg>
+      <a href="{% url 'shop:account' %}">حساب کاربری</a>
+      <svg class="icon" aria-hidden="true"><use href="#i-chevron-left"></use></svg>
+      <span class="breadcrumb__current">سفارش‌های من</span>
+    </nav>
+    <h1 class="page-head__title">سفارش‌های من</h1>
+    <p class="page-head__desc">تاریخچه کامل سفارش‌ها با وضعیت پرداخت و ارسال. برای مشاهده جزئیات، روی «مشاهده» کلیک کنید.</p>
+  </div>
+</div>
+
+<div class="container account-layout">
+  {% include "partials/account_nav.html" with account_section="orders" %}
+
+  <div>
+    <div class="chips" style="margin-bottom: 14px;">
+      <a class="chip {% if not status_filter %}is-active{% endif %}" href="{% url 'shop:account_orders' %}" style="{% if not status_filter %}border-color: var(--blue-400); color: var(--blue-600);{% endif %}">همه سفارش‌ها</a>
+      {% for key, label in status_choices %}
+        <a class="chip" href="?status={{ key }}" style="{% if status_filter == key %}border-color: var(--blue-400); color: var(--blue-600);{% endif %}">{{ label }}</a>
+      {% endfor %}
+    </div>
+
+    <div class="panel" style="padding: 0; overflow: hidden;">
+      {% if orders %}
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>کد سفارش</th>
+                <th>تاریخ ثبت</th>
+                <th>اقلام</th>
+                <th>مبلغ کل</th>
+                <th>پرداخت</th>
+                <th>وضعیت</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for order in orders %}
+                <tr>
+                  <td><span class="data-table__code">{{ order.code }}</span></td>
+                  <td>{{ order.created_at|jalali }}</td>
+                  <td>{{ order.items_count|fa }} عدد</td>
+                  <td><span class="data-table__price">{{ order.total|price }} تومان</span></td>
+                  <td>{{ order.get_payment_status_display }}</td>
+                  <td><span class="status-pill status--{{ order.status }}">{{ order.get_status_display }}</span></td>
+                  <td>
+                    <a class="table-link" href="{{ order.get_absolute_url }}">
+                      مشاهده
+                      <svg class="icon" aria-hidden="true"><use href="#i-chevron-left"></use></svg>
+                    </a>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="empty" style="border: 0; border-radius: 0;">
+          <span class="empty__icon"><svg class="icon" aria-hidden="true"><use href="#i-box"></use></svg></span>
+          <h2 class="empty__title">سفارشی در این وضعیت وجود ندارد</h2>
+          <p class="empty__desc">با تغییر فیلتر وضعیت، سایر سفارش‌ها را ببینید یا اولین خرید خود را ثبت کنید.</p>
+          <div class="empty__actions">
+            <a class="btn btn--primary" href="{% url 'shop:catalog' %}">مشاهده محصولات</a>
+            <a class="btn btn--outline" href="{% url 'shop:account_orders' %}">همه سفارش‌ها</a>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+
+    {% if page_obj.paginator.num_pages > 1 %}
+      <nav class="pagination" aria-label="صفحه‌بندی سفارش‌ها">
+        {% if page_obj.has_previous %}
+          <a class="pagination__link" href="?{% querystring page=page_obj.previous_page_number %}" aria-label="صفحه قبلی">
+            <svg class="icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg>
+          </a>
+        {% endif %}
+        {% for num in page_obj.paginator.page_range %}
+          {% if num == page_obj.number %}
+            <span class="pagination__current">{{ num|fa }}</span>
+          {% else %}
+            <a class="pagination__link" href="?{% querystring page=num %}">{{ num|fa }}</a>
+          {% endif %}
+        {% endfor %}
+        {% if page_obj.has_next %}
+          <a class="pagination__link" href="?{% querystring page=page_obj.next_page_number %}" aria-label="صفحه بعدی">
+            <svg class="icon" aria-hidden="true"><use href="#i-chevron-left"></use></svg>
+          </a>
+        {% endif %}
+      </nav>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

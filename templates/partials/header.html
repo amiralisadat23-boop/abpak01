@@ -1,0 +1,157 @@
+{% load static shop_tags %}
+<header class="site-header" id="siteHeader">
+  <div class="topbar">
+    <div class="container topbar__inner">
+      <div class="topbar__right">
+        <a class="topbar__link" href="tel:{{ STORE.phone_raw }}">
+          <svg class="icon" aria-hidden="true"><use href="#i-phone"></use></svg>
+          <span class="topbar__label">پشتیبانی:</span>
+          <span class="topbar__value">{{ STORE.phone }}</span>
+        </a>
+        <span class="topbar__divider" aria-hidden="true"></span>
+        <span class="topbar__link topbar__link--static topbar__shipping">
+          <svg class="icon" aria-hidden="true"><use href="#i-truck"></use></svg>
+          <span>ارسال رایگان برای خرید بالای {{ FREE_SHIPPING_THRESHOLD_FA }} تومان</span>
+        </span>
+      </div>
+      <div class="topbar__left">
+        <a class="topbar__track" href="{% url 'shop:track_order' %}">
+          <svg class="icon" aria-hidden="true"><use href="#i-box"></use></svg>
+          <span class="topbar__track-text">پیگیری سفارش</span>
+          <span class="topbar__track-dot" aria-hidden="true"></span>
+        </a>
+        <a class="topbar__link topbar__link--wa" href="{{ STORE.whatsapp }}" target="_blank" rel="noopener" aria-label="مشاوره در واتساپ">
+          <svg class="icon" aria-hidden="true"><use href="#i-whatsapp"></use></svg>
+          <span class="topbar__wa-text">واتساپ</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="header">
+    <div class="container header__inner">
+      <button type="button" class="icon-btn header__menu-btn" data-drawer-open aria-label="باز کردن منو" aria-controls="mobileDrawer" aria-expanded="false">
+        <svg class="icon" aria-hidden="true"><use href="#i-menu"></use></svg>
+      </button>
+
+      <a class="brand" href="{% url 'shop:home' %}" aria-label="{{ site.site_name }} - صفحه اصلی">
+        <span class="brand__mark" aria-hidden="true">
+          {% if site.logo %}
+            <img class="brand__logo" src="{{ site.logo.url }}" alt="">
+          {% else %}
+            {% include "partials/brand_mark.html" %}
+          {% endif %}
+        </span>
+        <span class="brand__text">
+          <strong class="brand__name">{{ site.site_name }}</strong>
+          <span class="brand__sub">{{ site.site_name_en }} · {{ site.tagline }}</span>
+        </span>
+      </a>
+
+      <nav class="nav" aria-label="منوی اصلی">
+        <ul class="nav__list">
+          <li class="nav__item">
+            <a class="nav__link {% if request.resolver_match.url_name == 'home' %}is-active{% endif %}" href="{% url 'shop:home' %}">خانه</a>
+          </li>
+          <li class="nav__item has-dropdown has-mega" data-dropdown>
+            <a class="nav__link nav__link--shop {% if request.resolver_match.url_name == 'catalog' %}is-active{% endif %}" href="{% url 'shop:catalog' %}">
+              دسته‌بندی محصولات
+              <svg class="icon nav__caret" aria-hidden="true"><use href="#i-chevron-down"></use></svg>
+            </a>
+            <button type="button" class="nav__expand" data-dropdown-toggle aria-label="نمایش دسته‌بندی محصولات" aria-expanded="false">
+              <svg class="icon" aria-hidden="true"><use href="#i-chevron-down"></use></svg>
+            </button>
+            <div class="dropdown dropdown--mega">
+              <div class="mega">
+                <div class="mega__list">
+                  <span class="mega__title">دسته‌بندی تخصصی تجهیزات تصفیه آب</span>
+                  <ul class="mega__grid">
+                    {% for category in nav_categories %}
+                      <li>
+                        <a class="mega__link" href="{{ category.get_absolute_url }}">
+                          <span class="mega__icon"><svg class="icon" aria-hidden="true"><use href="#i-{{ category.icon }}"></use></svg></span>
+                          <span class="mega__text">
+                            <strong>{{ category.name }}</strong>
+                            <small>{{ category.active_count|fa }} کالا</small>
+                          </span>
+                        </a>
+                      </li>
+                    {% endfor %}
+                  </ul>
+                  <a class="mega__all" href="{% url 'shop:catalog' %}">
+                    مشاهده همه محصولات
+                    <svg class="icon" aria-hidden="true"><use href="#i-arrow-left"></use></svg>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </li>
+          <li class="nav__item">
+            <a class="nav__link {% if request.resolver_match.url_name == 'category' and request.resolver_match.kwargs.slug == 'home-water-purifiers' %}is-active{% endif %}" href="{% url 'shop:category' 'home-water-purifiers' %}">دستگاه خانگی</a>
+          </li>
+          <li class="nav__item">
+            <a class="nav__link {% if request.resolver_match.url_name == 'category' and request.resolver_match.kwargs.slug == 'industrial-water-purifiers' %}is-active{% endif %}" href="{% url 'shop:category' 'industrial-water-purifiers' %}">دستگاه صنعتی</a>
+          </li>
+          <li class="nav__item">
+            <a class="nav__link {% if request.resolver_match.url_name == 'category' and request.resolver_match.kwargs.slug == 'filters-cartridges' %}is-active{% endif %}" href="{% url 'shop:category' 'filters-cartridges' %}">فیلتر و کارتریج</a>
+          </li>
+          <li class="nav__item">
+            <a class="nav__link {% if request.resolver_match.url_name == 'about' %}is-active{% endif %}" href="{% url 'shop:about' %}">درباره ما</a>
+          </li>
+          <li class="nav__item">
+            <a class="nav__link {% if request.resolver_match.url_name == 'contact' %}is-active{% endif %}" href="{% url 'shop:contact' %}">تماس با ما</a>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="header__actions">
+        <a class="header__cta" href="{% url 'shop:contact' %}">
+          <svg class="icon" aria-hidden="true"><use href="#i-headset"></use></svg>
+          مشاوره خرید
+        </a>
+
+        <div class="header__icons">
+          <button type="button" class="icon-btn theme-toggle" data-theme-toggle aria-label="تغییر حالت روز و شب" title="حالت روز / شب">
+            <svg class="icon theme-toggle__sun" aria-hidden="true"><use href="#i-sun"></use></svg>
+            <svg class="icon theme-toggle__moon" aria-hidden="true"><use href="#i-moon"></use></svg>
+          </button>
+
+          {% if user.is_authenticated %}
+            <div class="has-dropdown account-menu" data-dropdown>
+              <button type="button" class="icon-btn account-menu__btn" data-dropdown-toggle aria-expanded="false" aria-label="منوی حساب کاربری">
+                <svg class="icon" aria-hidden="true"><use href="#i-user"></use></svg>
+              </button>
+              <div class="dropdown dropdown--sm dropdown--end">
+                <span class="dropdown__heading">{{ user.get_full_name|default:user.username }}</span>
+                <a class="dropdown__link" href="{% url 'shop:account' %}">
+                  <svg class="icon" aria-hidden="true"><use href="#i-user-circle"></use></svg>
+                  حساب کاربری
+                </a>
+                <a class="dropdown__link" href="{% url 'shop:account_orders' %}">
+                  <svg class="icon" aria-hidden="true"><use href="#i-box"></use></svg>
+                  سفارش‌های من
+                </a>
+                <form action="{% url 'shop:logout' %}" method="post">
+                  {% csrf_token %}
+                  <button class="dropdown__link dropdown__link--button" type="submit">
+                    <svg class="icon" aria-hidden="true"><use href="#i-logout"></use></svg>
+                    خروج از حساب
+                  </button>
+                </form>
+              </div>
+            </div>
+          {% else %}
+            <a class="icon-btn" href="{% url 'shop:login' %}?next={{ request.path|urlencode }}" aria-label="ورود و ثبت‌نام">
+              <svg class="icon" aria-hidden="true"><use href="#i-user"></use></svg>
+            </a>
+          {% endif %}
+
+          <a class="icon-btn cart-btn" href="{% url 'shop:cart' %}" aria-label="سبد خرید">
+            <svg class="icon" aria-hidden="true"><use href="#i-cart"></use></svg>
+            <span class="cart-btn__badge" data-cart-count{% if not cart_count %} hidden{% endif %}>{{ cart_count|fa }}</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>

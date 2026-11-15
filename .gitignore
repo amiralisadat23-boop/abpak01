@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+db.sqlite3
+db.sqlite3-journal
+staticfiles/
+media/products/
+media/categories/
+media/brands/
+.env
+.venv/
+venv/
+.DS_Store
+
+.packages/
+media_original_backup/
+db.sqlite3.bak

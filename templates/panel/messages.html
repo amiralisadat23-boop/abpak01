@@ -1,0 +1,44 @@
+{% extends "panel/base.html" %}
+{% load shop_tags %}
+
+{% block content %}
+<div class="p-card">
+  <div class="p-card__head">
+    <h2>پیام‌های مشتریان</h2>
+    <div class="p-chips p-chips--inline">
+      <a class="p-chip {% if not unread %}is-active{% endif %}" href="{% url 'panel:messages' %}">همه</a>
+      <a class="p-chip {% if unread %}is-active{% endif %}" href="?unread=1">خوانده‌نشده</a>
+    </div>
+  </div>
+  {% for message in messages_list %}
+    <article class="p-message {% if not message.is_read %}is-unread{% endif %}">
+      <div class="p-message__head">
+        <div>
+          <strong>{{ message.full_name }}</strong>
+          <small dir="ltr">{{ message.phone|fa }}</small>
+        </div>
+        <span class="p-muted">{{ message.created_at|date:"Y/m/d H:i" }}</span>
+      </div>
+      <h3>{{ message.subject }}</h3>
+      <p>{{ message.message|linebreaksbr }}</p>
+      <div class="p-message__foot">
+        {% if message.email %}<a class="p-link" href="mailto:{{ message.email }}">{{ message.email }}</a>{% endif %}
+        <form method="post" action="{% url 'panel:message_read' message.pk %}">
+          {% csrf_token %}
+          <button class="btn btn--ghost btn--sm" type="submit">{% if message.is_read %}علامت‌گذاری خوانده‌نشده{% else %}خوانده شد{% endif %}</button>
+        </form>
+      </div>
+    </article>
+  {% empty %}
+    <p class="p-empty">پیامی وجود ندارد.</p>
+  {% endfor %}
+
+  {% if page_obj.has_other_pages %}
+    <div class="p-pagination">
+      {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}{% if unread %}&unread=1{% endif %}">قبلی</a>{% endif %}
+      <span>صفحه {{ page_obj.number|fa }} از {{ page_obj.paginator.num_pages|fa }}</span>
+      {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}{% if unread %}&unread=1{% endif %}">بعدی</a>{% endif %}
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

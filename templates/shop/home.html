@@ -1,0 +1,441 @@
+{% extends "base.html" %}
+{% load shop_tags %}
+
+{% block content %}
+<section class="hero">
+  <div class="hero__grid-lines" aria-hidden="true"></div>
+  <div class="hero__waves" aria-hidden="true">
+    <svg class="wave wave--1" viewBox="0 0 1440 180" preserveAspectRatio="none">
+      <path d="M0 96c120-38 240-38 360 0s240 38 360 0 240-38 360 0 240 38 360 0v84H0Z" fill="#2f9fdc" opacity="0.35"/>
+    </svg>
+    <svg class="wave wave--2" viewBox="0 0 1440 180" preserveAspectRatio="none">
+      <path d="M0 120c160-44 280-16 420 8s260 8 380-20 300-30 640 12v60H0Z" fill="#8ed7f5" opacity="0.22"/>
+    </svg>
+  </div>
+
+  <div class="container hero__slider" data-slider data-autoplay="7500">
+    <!-- اسلاید ۱ -->
+    <article class="hero__slide is-active" data-slide aria-hidden="false">
+      <div class="hero__slide-inner">
+        <div class="hero__content">
+          <span class="hero__eyebrow"><span class="dot" aria-hidden="true"></span> فروشگاه تخصصی تجهیزات تصفیه آب</span>
+          <h1 class="hero__title">آب سالم،<span class="accent">زندگی سالم</span></h1>
+          <p class="hero__subtitle">تجهیزات تصفیه آب با بالاترین کیفیت</p>
+          <p class="hero__desc">
+            عرضه انواع دستگاه‌های تصفیه آب خانگی و صنعتی، فیلترها و قطعات تخصصی با ضمانت اصالت کالا؛
+            انتخابی مطمئن برای آب آشامیدنی خانواده و کسب‌وکار شما.
+          </p>
+          <div class="hero__actions">
+            <a class="btn btn--primary" href="{% url 'shop:catalog' %}">
+              مشاهده محصولات
+              <svg class="icon" aria-hidden="true"><use href="#i-arrow-left"></use></svg>
+            </a>
+            <a class="btn btn--light" href="{% url 'shop:contact' %}">
+              <svg class="icon" aria-hidden="true"><use href="#i-headset"></use></svg>
+              مشاوره تخصصی خرید
+            </a>
+          </div>
+          <div class="hero__stats">
+            <div class="hero__stat"><strong>{{ total_products|fa }}</strong><span>مدل دستگاه و قطعه</span></div>
+            <div class="hero__stat"><strong>{{ nav_categories|length|fa }}</strong><span>دسته‌بندی تخصصی</span></div>
+            <div class="hero__stat"><strong>۱۸<em>ماه</em></strong><span>ضمانت اصالت کالا</span></div>
+          </div>
+        </div>
+        <div class="hero__art">
+          <span class="hero__art-glow" aria-hidden="true"></span>
+          <span class="hero__art-rings" aria-hidden="true"></span>
+          <span class="hero__art-rings hero__art-rings--inner" aria-hidden="true"></span>
+          {% if site.hero_image %}
+            <img class="hero__image" src="{{ site.hero_image.url }}" alt="{{ site.site_name }} — {{ site.tagline }}" fetchpriority="high" decoding="async">
+          {% else %}
+            {% include "partials/art/art-device.html" %}
+          {% endif %}
+          <div class="hero__float hero__float--1">
+            <span class="icon-wrap"><svg class="icon" aria-hidden="true"><use href="#i-shield"></use></svg></span>
+            <span>ضمانت اصالت کالا<small>مهر و گارانتی آب پاک</small></span>
+          </div>
+          <div class="hero__float hero__float--2">
+            <span class="icon-wrap"><svg class="icon" aria-hidden="true"><use href="#i-droplet"></use></svg></span>
+            <span>TDS زیر ۵۰<small>کیفیت قابل اندازه‌گیری</small></span>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- اسلاید ۲ -->
+    <article class="hero__slide" data-slide aria-hidden="true">
+      <div class="hero__slide-inner">
+        <div class="hero__content">
+          <span class="hero__eyebrow"><span class="dot" aria-hidden="true"></span> پیشنهاد ویژه برای خانه</span>
+          <h1 class="hero__title">آب خالص،<span class="accent">برای خانه شما</span></h1>
+          <p class="hero__subtitle">دستگاه‌های اسمز معکوس ۶ تا ۸ مرحله‌ای</p>
+          <p class="hero__desc">
+            با فیلترهای اورجینال، نصب حرفه‌ای و خدمات پس از فروش، آب آشامیدنی سالم و خوش‌طعم را
+            به آشپزخانه خود بیاورید.
+          </p>
+          <div class="hero__actions">
+            <a class="btn btn--primary" href="{% url 'shop:category' 'home-water-purifiers' %}">
+              دستگاه‌های خانگی
+              <svg class="icon" aria-hidden="true"><use href="#i-arrow-left"></use></svg>
+            </a>
+            <a class="btn btn--light" href="{% url 'shop:faq' %}">
+              <svg class="icon" aria-hidden="true"><use href="#i-file"></use></svg>
+              راهنمای انتخاب دستگاه
+            </a>
+          </div>
+          <div class="hero__stats">
+            <div class="hero__stat"><strong>۶ تا ۸</strong><span>مرحله تصفیه</span></div>
+            <div class="hero__stat"><strong>۷۵ تا ۱۰۰</strong><span>گالن ممبران</span></div>
+            <div class="hero__stat"><strong>فیلتر</strong><span>اورجینال و سازگار</span></div>
+          </div>
+        </div>
+        <div class="hero__art">
+          <span class="hero__art-glow" aria-hidden="true"></span>
+          <span class="hero__art-rings" aria-hidden="true"></span>
+          <span class="hero__art-rings hero__art-rings--inner" aria-hidden="true"></span>
+          {% include "partials/art/art-filters.html" %}
+          <div class="hero__float hero__float--1">
+            <span class="icon-wrap"><svg class="icon" aria-hidden="true"><use href="#i-filter"></use></svg></span>
+            <span>فیلترهای اورجینال<small>سازگار با دستگاه شما</small></span>
+          </div>
+          <div class="hero__float hero__float--2">
+            <span class="icon-wrap"><svg class="icon" aria-hidden="true"><use href="#i-wrench"></use></svg></span>
+            <span>نصب تخصصی<small>راه‌اندازی و آموزش</small></span>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- اسلاید ۳ -->
+    <article class="hero__slide" data-slide aria-hidden="true">
+      <div class="hero__slide-inner">
+        <div class="hero__content">
+          <span class="hero__eyebrow"><span class="dot" aria-hidden="true"></span> راه‌حل صنعتی آب پاک</span>
+          <h1 class="hero__title">تصفیه آب،<span class="accent">در مقیاس صنعتی</span></h1>
+          <p class="hero__subtitle">سیستم‌های RO و UF با طراحی سفارشی</p>
+          <p class="hero__desc">
+            از سیستم نیمه‌صنعتی ۲۵۰ لیتری تا خطوط ۲۰۰۰ لیتری؛ طراحی بر اساس آنالیز آب،
+            راه‌اندازی، آموزش بهره‌برداری و پشتیبانی فنی.
+          </p>
+          <div class="hero__actions">
+            <a class="btn btn--primary" href="{% url 'shop:category' 'industrial-water-purifiers' %}">
+              سیستم‌های صنعتی
+              <svg class="icon" aria-hidden="true"><use href="#i-arrow-left"></use></svg>
+            </a>
+            <a class="btn btn--light" href="{% url 'shop:contact' %}">
+              <svg class="icon" aria-hidden="true"><use href="#i-headset"></use></svg>
+              درخواست مشاوره فنی
+            </a>
+          </div>
+          <div class="hero__stats">
+            <div class="hero__stat"><strong>۲۰۰۰<em>L/H</em></strong><span>حداکثر ظرفیت</span></div>
+            <div class="hero__stat"><strong>PLC</strong><span>کنترل هوشمند</span></div>
+            <div class="hero__stat"><strong>۳۰۴/۳۱۶</strong><span>بدنه استیل</span></div>
+          </div>
+        </div>
+        <div class="hero__art">
+          <span class="hero__art-glow" aria-hidden="true"></span>
+          <span class="hero__art-rings" aria-hidden="true"></span>
+          <span class="hero__art-rings hero__art-rings--inner" aria-hidden="true"></span>
+          {% include "partials/art/art-industrial.html" %}
+          <div class="hero__float hero__float--1">
+            <span class="icon-wrap"><svg class="icon" aria-hidden="true"><use href="#i-factory"></use></svg></span>
+            <span>طراحی سفارشی<small>بر اساس آنالیز آب</small></span>
+          </div>
+          <div class="hero__float hero__float--2">
+            <span class="icon-wrap"><svg class="icon" aria-hidden="true"><use href="#i-award"></use></svg></span>
+            <span>پشتیبانی فنی<small>سرویس و نگهداری</small></span>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <div class="hero__controls">
+      <div class="container hero__controls-inner">
+        <div class="hero__dots" role="tablist" aria-label="اسلایدهای بنر">
+          <button class="hero__dot is-active" type="button" data-slide-to="0" aria-label="اسلاید یک" role="tab" aria-selected="true"></button>
+          <button class="hero__dot" type="button" data-slide-to="1" aria-label="اسلاید دو" role="tab" aria-selected="false"></button>
+          <button class="hero__dot" type="button" data-slide-to="2" aria-label="اسلاید سه" role="tab" aria-selected="false"></button>
+        </div>
+        <div class="hero__arrows">
+          <button class="hero__arrow" type="button" data-slide-prev aria-label="اسلاید قبلی">
+            <svg class="icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg>
+          </button>
+          <button class="hero__arrow" type="button" data-slide-next aria-label="اسلاید بعدی">
+            <svg class="icon" aria-hidden="true"><use href="#i-chevron-left"></use></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="hero__progress" aria-hidden="true"><span data-slider-progress></span></div>
+  </div>
+</section>
+
+<!-- مزایای فروشگاه -->
+<section class="benefits" aria-label="مزایای خرید از آب پاک">
+  <div class="container">
+    <div class="benefits__grid">
+      <div class="benefit">
+        <span class="benefit__icon"><svg class="icon" aria-hidden="true"><use href="#i-shield"></use></svg></span>
+        <div>
+          <div class="benefit__title">ضمانت اصالت کالا</div>
+          <div class="benefit__desc">مهر و گارانتی آب پاک روی تمام کالاها</div>
+        </div>
+      </div>
+      <div class="benefit">
+        <span class="benefit__icon"><svg class="icon" aria-hidden="true"><use href="#i-headset"></use></svg></span>
+        <div>
+          <div class="benefit__title">مشاوره تخصصی خرید</div>
+          <div class="benefit__desc">انتخاب دستگاه مناسب با راهنمایی کارشناس</div>
+        </div>
+      </div>
+      <div class="benefit">
+        <span class="benefit__icon"><svg class="icon" aria-hidden="true"><use href="#i-truck"></use></svg></span>
+        <div>
+          <div class="benefit__title">ارسال به سراسر ایران</div>
+          <div class="benefit__desc">پست پیشتاز، پیک تهران و باربری کالای حجیم</div>
+        </div>
+      </div>
+      <div class="benefit">
+        <span class="benefit__icon"><svg class="icon" aria-hidden="true"><use href="#i-credit-card"></use></svg></span>
+        <div>
+          <div class="benefit__title">پرداخت امن</div>
+          <div class="benefit__desc">پرداخت در محل و انتقال بانکی</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- دسته‌بندی‌ها -->
+<section class="section" id="categories">
+  <div class="container">
+    <div class="section__head">
+      <div>
+        <span class="eyebrow">تمرکز ما فقط تصفیه آب است</span>
+        <h2 class="section__title">خرید بر اساس <span>دسته‌بندی</span></h2>
+        <p class="section__subtitle">از دستگاه خانگی و صنعتی تا فیلتر، ممبران و اتصالات؛ همه تجهیزات مورد نیاز تصفیه آب در یک فروشگاه تخصصی.</p>
+      </div>
+      <a class="link-more" href="{% url 'shop:catalog' %}">
+        مشاهده همه محصولات
+        <svg class="icon" aria-hidden="true"><use href="#i-arrow-left"></use></svg>
+      </a>
+    </div>
+
+    <div class="category-grid">
+      {% for category in nav_categories %}
+        <a class="category-card" href="{{ category.get_absolute_url }}">
+          <span class="category-card__icon"><svg class="icon" aria-hidden="true"><use href="#i-{{ category.icon }}"></use></svg></span>
+          <span class="category-card__name">{{ category.name }}</span>
+          {% if category.short_description %}<span class="category-card__desc">{{ category.short_description|truncatechars:74 }}</span>{% endif %}
+          <span class="category-card__count">
+            {{ category.active_count|fa }} کالا
+            <svg class="icon" aria-hidden="true"><use href="#i-arrow-left"></use></svg>
+          </span>
+        </a>
+      {% endfor %}
+      <a class="category-card category-card--all" href="{% url 'shop:catalog' %}">
+        <span class="category-card__icon"><svg class="icon" aria-hidden="true"><use href="#i-grid"></use></svg></span>
+        <span class="category-card__name">همه محصولات آب پاک</span>
+        <span class="category-card__count">
+          {{ total_products|fa }} کالای تخصصی
+          <svg class="icon" aria-hidden="true"><use href="#i-arrow-left"></use></svg>
+        </span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- محصولات منتخب -->
+<section class="section section--alt" id="featured">
+  <div class="container">
+    <div class="section__head">
+      <div>
+        <span class="eyebrow">پیشنهاد خرید آب پاک</span>
+        <h2 class="section__title">محصولات <span>منتخب</span></h2>
+        <p class="section__subtitle">پرفروش‌ترین دستگاه‌ها، فیلترها و قطعاتی که مشتریان ما بیشترین اعتماد را به آن‌ها داشته‌اند.</p>
+      </div>
+      <a class="link-more" href="{% url 'shop:catalog' %}?sort=discount">
+        مشاهده پیشنهادهای ویژه
+        <svg class="icon" aria-hidden="true"><use href="#i-arrow-left"></use></svg>
+      </a>
+    </div>
+    <div class="product-grid">
+      {% for product in featured_products %}
+        {% include "partials/product_card.html" with product=product %}
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- درباره آب پاک -->
+<section class="section" id="about">
+  <div class="container">
+    <div class="about-split">
+      <div class="about-split__art" aria-hidden="true">
+        <svg viewBox="0 0 420 360" role="img" aria-label="کیفیت آب تصفیه‌شده">
+          <defs>
+            <linearGradient id="about-water" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#8ee0fb"/>
+              <stop offset="1" stop-color="#1f7fc4"/>
+            </linearGradient>
+            <linearGradient id="about-glass" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#ffffff" stop-opacity="0.24"/>
+              <stop offset="1" stop-color="#ffffff" stop-opacity="0.05"/>
+            </linearGradient>
+          </defs>
+          <circle cx="210" cy="150" r="120" fill="#2f9fdc" opacity="0.16"/>
+          <circle cx="210" cy="150" r="92" fill="none" stroke="#8ed7f5" stroke-opacity="0.3" stroke-dasharray="4 7"/>
+          <path d="M210 46c-26 30-48 56-48 84a48 48 0 0 0 96 0c0-28-22-54-48-84Z" fill="url(#about-water)" opacity="0.9"/>
+          <path d="M186 128a26 26 0 0 0 26 26" fill="none" stroke="#d9f4ff" stroke-width="4" stroke-linecap="round" opacity="0.8"/>
+          <ellipse cx="210" cy="300" rx="130" ry="16" fill="#020e19" opacity="0.3"/>
+          <path d="M96 296c30-12 62-12 92 0s62 12 92 0 40-9 58-2" fill="none" stroke="#8ed7f5" stroke-opacity="0.4" stroke-width="3" stroke-linecap="round"/>
+          <g opacity="0.85">
+            <circle cx="330" cy="94" r="20" fill="#ffffff" opacity="0.08"/>
+            <path d="M326 88a4 4 0 0 1 8 0M330 78v22" stroke="#f2b23e" stroke-width="2" stroke-linecap="round"/>
+            <circle cx="330" cy="94" r="26" fill="none" stroke="#f2b23e" stroke-opacity="0.35"/>
+          </g>
+          <g fill="#8ee0fb" opacity="0.55">
+            <circle cx="86" cy="112" r="4"/>
+            <circle cx="112" cy="152" r="2.6"/>
+            <circle cx="338" cy="188" r="3.4"/>
+          </g>
+        </svg>
+        <div class="about-split__badge">
+          <svg class="icon" aria-hidden="true"><use href="#i-check-circle"></use></svg>
+          <div>
+            کیفیت تضمین‌شده
+            <span>بررسی و تست پیش از ارسال</span>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <span class="eyebrow">درباره آب پاک</span>
+        <h2 class="section__title">آب پاک، همراه شما برای انتخاب تجهیزات مناسب تصفیه آب</h2>
+        <p class="section__subtitle">
+          ما یک فروشگاه تخصصی هستیم؛ نه فروشگاه عمومی. تمرکز ما روی دستگاه‌های تصفیه آب، فیلترها،
+          ممبران‌ها و قطعات مرتبط است تا بتوانیم مشاوره دقیق و محصول درست را ارائه کنیم.
+        </p>
+        <ul class="about-list">
+          <li>
+            <svg class="icon" aria-hidden="true"><use href="#i-check"></use></svg>
+            <span><strong>انتخاب بر اساس نیاز واقعی:</strong> کارشناسان ما با توجه به کیفیت آب منطقه، تعداد نفرات و میزان مصرف، دستگاه مناسب را پیشنهاد می‌دهند.</span>
+          </li>
+          <li>
+            <svg class="icon" aria-hidden="true"><use href="#i-check"></use></svg>
+            <span><strong>قطعات اورجینال و سازگار:</strong> فیلتر، ممبران و پمپ‌ها با مشخصات کامل و سازگاری اعلام‌شده عرضه می‌شوند.</span>
+          </li>
+          <li>
+            <svg class="icon" aria-hidden="true"><use href="#i-check"></use></svg>
+            <span><strong>همراهی بعد از خرید:</strong> راهنمای نصب، زمان‌بندی تعویض فیلتر و پشتیبانی فنی در تمام مراحل.</span>
+          </li>
+        </ul>
+        <div class="stats-row">
+          <div class="stat-box"><strong>۱۰</strong><span>سال تجربه تخصصی</span></div>
+          <div class="stat-box"><strong>{{ total_products|fa }}</strong><span>کالای تصفیه آب</span></div>
+          <div class="stat-box"><strong>{{ nav_categories|length|fa }}</strong><span>دسته‌بندی تخصصی</span></div>
+        </div>
+        <div style="margin-top: 26px; display: flex; gap: 10px; flex-wrap: wrap;">
+          <a class="btn btn--navy" href="{% url 'shop:about' %}">
+            <svg class="icon" aria-hidden="true"><use href="#i-info"></use></svg>
+            داستان آب پاک
+          </a>
+          <a class="btn btn--outline" href="{% url 'shop:contact' %}">درخواست مشاوره</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- برندها -->
+<section class="brand-strip">
+  <div class="container brand-strip__inner">
+    <span class="brand-strip__label">برندهای موجود در فروشگاه آب پاک</span>
+    <div class="brand-strip__list">
+      {% for brand in brands %}
+        <a class="brand-strip__item" href="{% url 'shop:search' %}?q={{ brand.name|urlencode }}">
+          <svg class="icon" aria-hidden="true"><use href="#i-award"></use></svg>
+          {{ brand.name }}
+          <small>{{ brand.country }}</small>
+        </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- تازه‌ترین محصولات -->
+<section class="section">
+  <div class="container">
+    <div class="section__head">
+      <div>
+        <span class="eyebrow">جدید در فروشگاه</span>
+        <h2 class="section__title">تازه‌ترین <span>کالاها</span></h2>
+        <p class="section__subtitle">آخرین محصولات اضافه‌شده به فروشگاه تخصصی آب پاک.</p>
+      </div>
+      <a class="link-more" href="{% url 'shop:catalog' %}">
+        همه محصولات
+        <svg class="icon" aria-hidden="true"><use href="#i-arrow-left"></use></svg>
+      </a>
+    </div>
+    <div class="product-grid">
+      {% for product in new_arrivals %}
+        {% include "partials/product_card.html" with product=product %}
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- سوالات متداول + پشتیبانی -->
+<section class="section section--alt">
+  <div class="container">
+    <div class="content-split">
+      <div>
+        <span class="eyebrow">پاسخ سوالات پرتکرار</span>
+        <h2 class="section__title">قبل از خرید، <span>مطمئن شوید</span></h2>
+        <p class="section__subtitle">پاسخ کوتاه پرتکرارترین سوالات مشتریان درباره دستگاه‌های تصفیه آب و خرید از آب پاک.</p>
+        <div class="cta-band" style="margin-top: 24px; padding: 26px;">
+          <div>
+            <div class="cta-band__title">در انتخاب دستگاه مطمئن نیستید؟</div>
+            <p class="cta-band__desc">کارشناسان ما رایگان راهنمایی می‌کنند؛ از کیفیت آب تا انتخاب فیلتر مناسب.</p>
+          </div>
+          <div class="cta-band__actions">
+            <a class="btn btn--primary" href="tel:{{ STORE.phone_raw }}">
+              <svg class="icon" aria-hidden="true"><use href="#i-phone"></use></svg>
+              تماس با کارشناس
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="faq-mini">
+        <details class="faq-item" open>
+          <summary class="faq-q">
+            دستگاه تصفیه آب خانگی چند مرحله تصفیه دارد؟
+            <svg class="icon" aria-hidden="true"><use href="#i-chevron-down"></use></svg>
+          </summary>
+          <div class="faq-a">دستگاه‌های خانگی معمولاً ۵ تا ۸ مرحله تصفیه دارند: رسوب‌گیر، کربن، ممبران اسمز معکوس، پست‌کربن و در مدل‌های پیشرفته فیلتر مینرال، قلیایی‌ساز و UV.</div>
+        </details>
+        <details class="faq-item">
+          <summary class="faq-q">
+            هر چند وقت یک‌بار فیلترها را تعویض کنم؟
+            <svg class="icon" aria-hidden="true"><use href="#i-chevron-down"></use></svg>
+          </summary>
+          <div class="faq-a">فیلترهای رسوب‌گیر و کربن هر ۶ ماه، ممبران هر ۱۸ تا ۲۴ ماه و فیلترهای مینرال و پست‌کربن هر ۱۲ ماه. این بازه به کیفیت آب و میزان مصرف بستگی دارد.</div>
+        </details>
+        <details class="faq-item">
+          <summary class="faq-q">
+            ارسال به شهرستان چگونه انجام می‌شود؟
+            <svg class="icon" aria-hidden="true"><use href="#i-chevron-down"></use></svg>
+          </summary>
+          <div class="faq-a">سفارش‌ها با پست پیشتاز (۲ تا ۴ روز کاری) ارسال می‌شوند. کالاهای حجیم مانند دستگاه صنعتی و مخزن بزرگ با باربری ارسال می‌شوند و هزینه آن در صفحه سفارش مشخص می‌شود.</div>
+        </details>
+        <a class="link-more" style="margin-top: 6px; justify-content: center;" href="{% url 'shop:faq' %}">
+          همه سوالات متداول
+          <svg class="icon" aria-hidden="true"><use href="#i-arrow-left"></use></svg>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

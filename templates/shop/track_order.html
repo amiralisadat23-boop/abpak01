@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% load shop_tags %}
+
+{% block content %}
+<div class="page-head">
+  <div class="container">
+    <nav class="breadcrumb" aria-label="مسیر صفحه">
+      <a href="{% url 'shop:home' %}">خانه</a>
+      <svg class="icon" aria-hidden="true"><use href="#i-chevron-left"></use></svg>
+      <span class="breadcrumb__current">پیگیری سفارش</span>
+    </nav>
+    <h1 class="page-head__title">پیگیری سفارش</h1>
+    <p class="page-head__desc">کد سفارش و شماره تماس ثبت‌شده را وارد کنید تا وضعیت پردازش و ارسال سفارش را ببینید.</p>
+  </div>
+</div>
+
+<div class="container">
+  <div class="track-ribbon" aria-label="مراحل پردازش سفارش">
+    <div class="track-ribbon__item"><span class="track-ribbon__icon"><svg class="icon"><use href="#i-clipboard"></use></svg></span><strong>ثبت سفارش</strong></div>
+    <div class="track-ribbon__item"><span class="track-ribbon__icon"><svg class="icon"><use href="#i-check-circle"></use></svg></span><strong>تأیید سفارش</strong></div>
+    <div class="track-ribbon__item"><span class="track-ribbon__icon"><svg class="icon"><use href="#i-package"></use></svg></span><strong>آماده‌سازی</strong></div>
+    <div class="track-ribbon__item"><span class="track-ribbon__icon"><svg class="icon"><use href="#i-truck"></use></svg></span><strong>ارسال</strong></div>
+    <div class="track-ribbon__item"><span class="track-ribbon__icon"><svg class="icon"><use href="#i-home"></use></svg></span><strong>تحویل</strong></div>
+  </div>
+</div>
+
+<div class="container track-layout">
+  <div>
+    <div class="track-card">
+      <h2 class="panel__title" style="margin-bottom: 8px;">
+        <svg class="icon" aria-hidden="true"><use href="#i-search"></use></svg>
+        جستجوی سفارش
+      </h2>
+      <p class="field__hint" style="margin-bottom: 18px;">کد سفارش در پیام تأیید و صفحه ثبت سفارش نمایش داده شده است (مثال: ABP-241105-A1B2C).</p>
+
+      {% if form.non_field_errors %}
+        <div class="form-errors">
+          {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+        </div>
+      {% endif %}
+
+      <form method="post" action="{% url 'shop:track_order' %}" class="track-form">
+        {% csrf_token %}
+        <div class="form-row">
+          <div class="field {% if form.code.errors %}has-error{% endif %}">
+            <label class="field__label" for="{{ form.code.id_for_label }}">{{ form.code.label }}</label>
+            {{ form.code }}
+            {% for error in form.code.errors %}<span class="field__error">{{ error }}</span>{% endfor %}
+          </div>
+          <div class="field {% if form.phone.errors %}has-error{% endif %}">
+            <label class="field__label" for="{{ form.phone.id_for_label }}">{{ form.phone.label }}</label>
+            {{ form.phone }}
+            {% for error in form.phone.errors %}<span class="field__error">{{ error }}</span>{% endfor %}
+          </div>
+        </div>
+        <button class="btn btn--primary" type="submit">
+          <svg class="icon" aria-hidden="true"><use href="#i-search"></use></svg>
+          مشاهده وضعیت سفارش
+        </button>
+      </form>
+    </div>
+
+    <div class="track-card" style="margin-top: 16px;">
+      <h2 class="panel__title" style="margin-bottom: 16px;">
+        <svg class="icon" aria-hidden="true"><use href="#i-info"></use></svg>
+        مراحل پردازش سفارش
+      </h2>
+      <div class="track-steps">
+        {% for key, label in status_choices %}
+          <div class="track-step">
+            <span class="track-step__num">{{ forloop.counter|fa }}</span>
+            <span>
+              <strong>{{ label }}</strong>
+              {% if key == 'pending' %} — سفارش ثبت شده و در انتظار بررسی کارشناسان است.
+              {% elif key == 'confirmed' %} — موجودی و اطلاعات سفارش تأیید شده است.
+              {% elif key == 'processing' %} — کالا بسته‌بندی و برای ارسال آماده می‌شود.
+              {% elif key == 'shipped' %} — مرسوله تحویل پست یا باربری شده و کد رهگیری ثبت می‌شود.
+              {% elif key == 'delivered' %} — سفارش تحویل مشتری شده است.
+              {% elif key == 'canceled' %} — سفارش به درخواست مشتری یا به دلیل نبود موجودی لغو شده است.
+              {% endif %}
+            </span>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <aside class="info-side">
+    <div class="side-card">
+      <h3 class="side-card__title">
+        <svg class="icon" aria-hidden="true"><use href="#i-headset"></use></svg>
+        نیاز به کمک دارید؟
+      </h3>
+      <ul class="side-list">
+        <li>
+          <svg class="icon" aria-hidden="true"><use href="#i-phone"></use></svg>
+          <span>تماس با پشتیبانی: <a href="tel:{{ STORE.phone_raw }}" dir="ltr">{{ STORE.phone }}</a></span>
+        </li>
+        <li>
+          <svg class="icon" aria-hidden="true"><use href="#i-clock"></use></svg>
+          <span>{{ STORE.hours }}</span>
+        </li>
+        <li>
+          <svg class="icon" aria-hidden="true"><use href="#i-mail"></use></svg>
+          <span><a href="mailto:{{ STORE.email }}">{{ STORE.email }}</a></span>
+        </li>
+        <li>
+          <svg class="icon" aria-hidden="true"><use href="#i-user-circle"></use></svg>
+          <span>با ورود به حساب کاربری، همه سفارش‌ها را یک‌جا ببینید.</span>
+        </li>
+      </ul>
+      <a class="btn btn--outline btn--block btn--sm" href="{% url 'shop:login' %}?next={% url 'shop:account_orders' %}" style="margin-top: 14px;">ورود به حساب کاربری</a>
+      <a class="btn btn--primary btn--block btn--sm" href="{{ STORE.whatsapp }}" target="_blank" rel="noopener" style="margin-top: 8px;">
+        <svg class="icon" aria-hidden="true"><use href="#i-whatsapp"></use></svg>
+        پیگیری سریع در واتساپ
+      </a>
+    </div>
+
+    <div class="help-card">
+      <div class="help-card__title">
+        <svg class="icon" aria-hidden="true"><use href="#i-shield"></use></svg>
+        نکته امنیتی
+      </div>
+      برای حفظ حریم خصوصی، مشاهده سفارش فقط با تطبیق کد سفارش و شماره تماس ثبت‌شده امکان‌پذیر است.
+    </div>
+  </aside>
+</div>
+{% endblock %}

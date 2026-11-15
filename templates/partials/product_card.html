@@ -1,0 +1,61 @@
+{% load shop_tags %}
+<article class="product-card">
+  <a class="product-card__media" href="{{ product.get_absolute_url }}" aria-label="{{ product.name }}">
+    {% if product.main_image %}
+      {% with image=product.main_image %}
+        <img src="{{ image.image.url }}"
+             alt="{{ image.alt|default:product.name }}"
+             {% if image.card_url %}srcset="{{ image.card_url }} 400w{% if image.large_url %}, {{ image.large_url }} 800w{% endif %}" sizes="(max-width: 640px) 45vw, 320px"{% endif %}
+             loading="lazy" decoding="async" width="400" height="400">
+      {% endwith %}
+    {% else %}
+      {% include "partials/product_placeholder.html" %}
+    {% endif %}
+    <div class="product-card__badges">
+      {% if product.has_discount %}
+        <span class="badge badge--discount">{{ product.discount_percent|fa }}٪ تخفیف</span>
+      {% endif %}
+      {% if product.is_featured and not product.has_discount %}
+        <span class="badge badge--featured">پیشنهاد آب پاک</span>
+      {% endif %}
+    </div>
+    {% if not product.in_stock %}
+      <span class="product-card__stock-tag badge badge--out">ناموجود</span>
+    {% endif %}
+  </a>
+  <div class="product-card__body">
+    <span class="product-card__category">{{ product.category.name }}</span>
+    <h3 class="product-card__title"><a href="{{ product.get_absolute_url }}">{{ product.name }}</a></h3>
+    <p class="product-card__meta">
+      {% if product.brand %}<span>{{ product.brand.name }}</span><span class="sep"></span>{% endif %}
+      <span>کد {{ product.sku }}</span>
+    </p>
+    <div class="product-card__price">
+      {% if product.has_discount %}
+        <span class="price-old">{{ product.old_price|price }} تومان</span>
+      {% endif %}
+      <span class="price-now">{{ product.price|price }}<small>تومان</small></span>
+    </div>
+    <span class="product-card__stock{% if not product.in_stock %} product-card__stock--out{% elif product.stock <= 3 %} product-card__stock--low{% endif %}">
+      {% if not product.in_stock %}ناموجود در انبار
+      {% elif product.stock <= 3 %}تنها {{ product.stock|fa }} عدد در انبار
+      {% else %}موجود در انبار{% endif %}
+    </span>
+    <div class="product-card__actions">
+      <a class="btn btn--view" href="{{ product.get_absolute_url }}" title="مشاهده محصول">
+        <svg class="icon" aria-hidden="true"><use href="#i-eye"></use></svg>
+        مشاهده
+      </a>
+      <form method="post" action="{% url 'shop:cart_add' %}" data-add-to-cart>
+        {% csrf_token %}
+        <input type="hidden" name="product_id" value="{{ product.id }}">
+        <input type="hidden" name="quantity" value="1">
+        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+        <button type="submit" class="btn btn--primary" {% if not product.in_stock %}disabled aria-disabled="true"{% endif %}>
+          <svg class="icon" aria-hidden="true"><use href="#i-cart"></use></svg>
+          {% if product.in_stock %}افزودن به سبد{% else %}ناموجود{% endif %}
+        </button>
+      </form>
+    </div>
+  </div>
+</article>

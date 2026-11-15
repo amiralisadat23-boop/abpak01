@@ -1,0 +1,229 @@
+{% extends "base.html" %}
+{% load shop_tags %}
+
+{% block content %}
+<div class="page-head">
+  <div class="container">
+    <nav class="breadcrumb" aria-label="مسیر صفحه">
+      <a href="{% url 'shop:home' %}">خانه</a>
+      <svg class="icon" aria-hidden="true"><use href="#i-chevron-left"></use></svg>
+      <a href="{% url 'shop:account_orders' %}">سفارش‌های من</a>
+      <svg class="icon" aria-hidden="true"><use href="#i-chevron-left"></use></svg>
+      <span class="breadcrumb__current">سفارش {{ order.code }}</span>
+    </nav>
+    <h1 class="page-head__title">جزئیات سفارش</h1>
+    <p class="page-head__desc">وضعیت پردازش و اطلاعات ارسال سفارش خود را در این صفحه ببینید.</p>
+  </div>
+</div>
+
+<div class="container order-layout">
+  <div>
+    {% if is_new %}
+      <div class="success-banner">
+        <span class="success-banner__icon">
+          <svg class="icon" aria-hidden="true"><use href="#i-check"></use></svg>
+        </span>
+        <div>
+          <div class="success-banner__title">سفارش شما با موفقیت ثبت شد</div>
+          <p class="success-banner__desc">
+            کد سفارش <strong style="direction: ltr; display: inline-block;">{{ order.code }}</strong> را نگه دارید.
+            کارشناسان آب پاک برای تأیید موجودی و هماهنگی ارسال با شماره {{ order.phone }} تماس می‌گیرند.
+            {% if order.payment_method == 'transfer' %}شماره کارت برای انتقال بانکی توسط پشتیبانی ارسال می‌شود.{% endif %}
+          </p>
+        </div>
+      </div>
+    {% endif %}
+
+    <div class="order-head">
+      <div>
+        <div class="order-head__code">{{ order.code }}</div>
+        <div class="order-head__meta">ثبت در {{ order.created_at|jalali }}</div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+        <span class="status-pill status--{{ order.status }}">{{ order.get_status_display }}</span>
+        <span class="badge">{{ order.get_payment_status_display }}</span>
+      </div>
+    </div>
+
+    {% if order.payment_method == 'online' %}
+      <div class="order-panel" style="border-color: var(--border-strong);">
+        <h2 class="order-panel__title">
+          <svg class="icon" aria-hidden="true"><use href="#i-credit-card"></use></svg>
+          وضعیت پرداخت آنلاین
+        </h2>
+        {% if order.payment_status == 'paid' %}
+          <p class="field__hint" style="margin-top: 8px;">
+            پرداخت این سفارش تأیید شده است.
+            {% if order.payment_ref_id %}
+              <br>کد پیگیری تراکنش:
+              <strong style="direction: ltr; display: inline-block;">{{ order.payment_ref_id }}</strong>
+            {% endif %}
+            {% if order.paid_at %}<br>زمان پرداخت: {{ order.paid_at|jalali }}{% endif %}
+          </p>
+        {% elif order.status == 'canceled' %}
+          <p class="field__hint" style="margin-top: 8px;">این سفارش لغو شده و قابل پرداخت نیست.</p>
+        {% elif PAYMENT_GATEWAY_ENABLED %}
+          <p class="field__hint" style="margin-top: 8px;">
+            این سفارش هنوز پرداخت نشده است. برای تکمیل خرید، مبلغ
+            <strong>{{ order.total|price }} تومان</strong> را از طریق درگاه امن بانکی پرداخت کنید.
+          </p>
+          <form method="post" action="{% url 'shop:payment_start' order.code %}" style="margin-top: 14px;">
+            {% csrf_token %}
+            <button class="btn btn--primary" type="submit">
+              <svg class="icon" aria-hidden="true"><use href="#i-credit-card"></use></svg>
+              پرداخت آنلاین سفارش
+            </button>
+          </form>
+        {% else %}
+          <p class="field__hint" style="margin-top: 8px;">درگاه پرداخت آنلاین در حال حاضر غیرفعال است.</p>
+        {% endif %}
+      </div>
+    {% endif %}
+
+    {% if order.status == 'canceled' %}
+      <div class="alert alert--error" style="margin-bottom: 16px;">
+        <svg class="icon" aria-hidden="true"><use href="#i-info"></use></svg>
+        <span>این سفارش لغو شده است. در صورت نیاز به ثبت مجدد یا پیگیری، با پشتیبانی آب پاک تماس بگیرید.</span>
+      </div>
+    {% else %}
+      <div class="order-panel">
+        <h2 class="order-panel__title">
+          <svg class="icon" aria-hidden="true"><use href="#i-truck"></use></svg>
+          وضعیت پردازش سفارش
+        </h2>
+        <div class="timeline">
+          <div class="timeline__step {% if order.status_index > 0 %}is-done{% elif order.status_index == 0 %}is-current{% endif %}">
+            <span class="timeline__dot"><svg class="icon" aria-hidden="true"><use href="#i-file"></use></svg></span>
+            <span class="timeline__label">ثبت سفارش</span>
+          </div>
+          <div class="timeline__step {% if order.status_index > 1 %}is-done{% elif order.status_index == 1 %}is-current{% endif %}">
+            <span class="timeline__dot"><svg class="icon" aria-hidden="true"><use href="#i-check"></use></svg></span>
+            <span class="timeline__label">تأیید سفارش</span>
+          </div>
+          <div class="timeline__step {% if order.status_index > 2 %}is-done{% elif order.status_index == 2 %}is-current{% endif %}">
+            <span class="timeline__dot"><svg class="icon" aria-hidden="true"><use href="#i-box"></use></svg></span>
+            <span class="timeline__label">آماده‌سازی</span>
+          </div>
+          <div class="timeline__step {% if order.status_index > 3 %}is-done{% elif order.status_index == 3 %}is-current{% endif %}">
+            <span class="timeline__dot"><svg class="icon" aria-hidden="true"><use href="#i-truck"></use></svg></span>
+            <span class="timeline__label">ارسال</span>
+          </div>
+          <div class="timeline__step {% if order.status_index == 4 %}is-current{% endif %}">
+            <span class="timeline__dot"><svg class="icon" aria-hidden="true"><use href="#i-home"></use></svg></span>
+            <span class="timeline__label">تحویل</span>
+          </div>
+        </div>
+        {% if order.tracking_code %}
+          <p class="field__hint" style="margin-top: 12px;">            کد رهگیری مرسوله: <strong style="direction: ltr; display: inline-block;">{{ order.tracking_code|fa }}</strong></p>
+        {% endif %}
+      </div>
+    {% endif %}
+
+    <div class="order-panel">
+      <h2 class="order-panel__title">
+        <svg class="icon" aria-hidden="true"><use href="#i-cart"></use></svg>
+        اقلام سفارش ({{ order.items_count|fa }} عدد)
+      </h2>
+      {% for item in items %}
+        <div class="order-item">
+          <span class="order-item__media">
+            {% if item.product and item.product.main_image %}
+              <img src="{{ item.product.main_image.image.url }}" alt="{{ item.name }}">
+            {% else %}
+              <svg class="icon" aria-hidden="true" style="width:20px;height:20px;margin:14px;color:var(--muted);"><use href="#i-droplet"></use></svg>
+            {% endif %}
+          </span>
+          <div class="order-item__body">
+            <div class="order-item__name">
+              {% if item.product and item.slug %}
+                <a href="{% url 'shop:product_detail' item.slug %}">{{ item.name }}</a>
+              {% else %}{{ item.name }}{% endif %}
+            </div>
+            <div class="order-item__qty">{{ item.quantity|fa }} عدد × {{ item.unit_price|price }} تومان</div>
+          </div>
+          <span class="order-item__price">{{ item.total_price|price }} تومان</span>
+        </div>
+      {% endfor %}
+    </div>
+
+    <div class="order-panel">
+      <h2 class="order-panel__title">
+        <svg class="icon" aria-hidden="true"><use href="#i-map-pin"></use></svg>
+        اطلاعات گیرنده و ارسال
+      </h2>
+      <div class="info-grid">
+        <div class="info-block">
+          <div class="info-block__label"><svg class="icon" aria-hidden="true"><use href="#i-user"></use></svg> نام گیرنده</div>
+          <strong>{{ order.full_name }}</strong>
+        </div>
+        <div class="info-block">
+          <div class="info-block__label"><svg class="icon" aria-hidden="true"><use href="#i-phone"></use></svg> شماره تماس</div>
+          <strong style="direction: ltr; display: inline-block;">{{ order.phone|fa }}</strong>
+        </div>
+        <div class="info-block" style="grid-column: 1 / -1;">
+          <div class="info-block__label"><svg class="icon" aria-hidden="true"><use href="#i-map-pin"></use></svg> آدرس</div>
+          {{ order.province }}، {{ order.city }}، {{ order.address }}
+          {% if order.postal_code %}<br>کد پستی: {{ order.postal_code|fa }}{% endif %}
+        </div>
+        <div class="info-block">
+          <div class="info-block__label"><svg class="icon" aria-hidden="true"><use href="#i-truck"></use></svg> روش ارسال</div>
+          {{ order.shipping_label }}
+        </div>
+        <div class="info-block">
+          <div class="info-block__label"><svg class="icon" aria-hidden="true"><use href="#i-credit-card"></use></svg> روش پرداخت</div>
+          {{ order.payment_label }}
+        </div>
+        {% if order.note %}
+          <div class="info-block" style="grid-column: 1 / -1;">
+            <div class="info-block__label"><svg class="icon" aria-hidden="true"><use href="#i-file"></use></svg> توضیحات سفارش</div>
+            {{ order.note|linebreaksbr }}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <aside>
+    <div class="cart-summary">
+      <h2 class="cart-summary__title">
+        <svg class="icon" aria-hidden="true"><use href="#i-file"></use></svg>
+        صورت‌حساب
+      </h2>
+      <div class="order-total-row"><span>جمع کالاها</span><strong>{{ order.subtotal|price }} تومان</strong></div>
+      <div class="order-total-row">
+        <span>هزینه ارسال</span>
+        <strong>{% if order.shipping_cost == 0 %}رایگان{% else %}{{ order.shipping_cost|price }} تومان{% endif %}</strong>
+      </div>
+      <div class="summary-row summary-row--total">
+        <span>مبلغ کل</span>
+        <strong>{{ order.total|price }} تومان</strong>
+      </div>
+
+      <button class="btn btn--primary btn--block" type="button" data-print style="margin-top: 12px;">
+        <svg class="icon" aria-hidden="true"><use href="#i-file"></use></svg>
+        چاپ صورت‌حساب
+      </button>
+      <a class="btn btn--ghost btn--block btn--sm" href="{% url 'shop:account_orders' %}" style="margin-top: 8px;">سفارش‌های من</a>
+
+      <ul class="summary-trust">
+        <li><svg class="icon" aria-hidden="true"><use href="#i-headset"></use></svg> پشتیبانی: {{ STORE.phone }}</li>
+        <li><svg class="icon" aria-hidden="true"><use href="#i-clock"></use></svg> {{ STORE.hours }}</li>
+      </ul>
+    </div>
+
+    <div class="help-card" style="margin-top: 14px;">
+      <div class="help-card__title">
+        <svg class="icon" aria-hidden="true"><use href="#i-info"></use></svg>
+        پیگیری با کد سفارش
+      </div>
+      برای مشاهده سفارش در هر زمان، کد سفارش و شماره تماس ثبت‌شده را در صفحه پیگیری وارد کنید.
+      <div style="margin-top: 10px;">
+        <a class="table-link" href="{% url 'shop:track_order' %}">
+          صفحه پیگیری سفارش
+          <svg class="icon" aria-hidden="true"><use href="#i-arrow-left"></use></svg>
+        </a>
+      </div>
+    </div>
+  </aside>
+</div>
+{% endblock %}

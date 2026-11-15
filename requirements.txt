@@ -1,0 +1,13 @@
+Django>=4.2,<7.0
+Pillow>=10.0
+whitenoise>=6.8
+
+# وب‌سرور پروداکشن (سرویس web در docker-compose)
+gunicorn>=23.0
+
+# کارهای پس‌زمینه و صف پیام (سرویس‌های worker/beat در docker-compose)
+celery[redis]>=5.4
+redis>=5.0
+
+# بک‌اند کش مشترک بین پروسه‌ها روی Redis (CACHE_BACKEND=django_redis.cache.RedisCache)
+django-redis>=5.4

@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% load shop_tags %}
+
+{% block content %}
+<section class="page-hero">
+  <div class="container">
+    <nav class="breadcrumb" aria-label="مسیر صفحه">
+      <a href="{% url 'shop:home' %}">خانه</a>
+      <svg class="icon" aria-hidden="true"><use href="#i-chevron-left"></use></svg>
+      <span class="breadcrumb__current">سوالات متداول</span>
+    </nav>
+    <span class="page-hero__eyebrow">
+      <svg class="icon" aria-hidden="true"><use href="#i-info"></use></svg>
+      راهنمای خرید و نگهداری
+    </span>
+    <h1 class="page-hero__title">سوالات متداول تصفیه آب</h1>
+    <p class="page-hero__desc">پاسخ پرتکرارترین سوالات درباره انتخاب دستگاه، تعویض فیلتر، نصب، گارانتی و ارسال سفارش. اگر پاسخ سوال خود را پیدا نکردید، با پشتیبانی تماس بگیرید.</p>
+  </div>
+</section>
+
+<div class="container faq-layout">
+  <aside class="faq-nav">
+    <div class="faq-nav__title">موضوع‌ها</div>
+    {% for group in faq_groups %}
+      <a href="#faq-{% if forloop.counter == 3 %}warranty{% elif forloop.counter == 4 %}shipping{% else %}group-{{ forloop.counter }}{% endif %}">
+        <svg class="icon" aria-hidden="true"><use href="#i-{{ group.icon }}"></use></svg>
+        {{ group.title }}
+      </a>
+    {% endfor %}
+    <a href="{% url 'shop:contact' %}" style="margin-top: 6px; border-top: 1px solid var(--border); padding-top: 12px;">
+      <svg class="icon" aria-hidden="true"><use href="#i-headset"></use></svg>
+      پرسش دیگر دارم
+    </a>
+  </aside>
+
+  <div>
+    <div class="faq-search">
+      <div class="search" style="width: 100%; padding: 4px 10px 4px 4px;">
+        <svg class="icon search__icon" aria-hidden="true"><use href="#i-search"></use></svg>
+        <input class="search__input" type="search" placeholder="جستجو در سوالات متداول…" aria-label="جستجو در سوالات متداول" data-faq-search>
+      </div>
+    </div>
+
+    <div class="faq-groups" data-faq-groups>
+      {% for group in faq_groups %}
+        <section class="faq-group" id="faq-{% if forloop.counter == 3 %}warranty{% elif forloop.counter == 4 %}shipping{% else %}group-{{ forloop.counter }}{% endif %}" data-faq-group>
+          <h2 class="faq-group__title">
+            <svg class="icon" aria-hidden="true"><use href="#i-{{ group.icon }}"></use></svg>
+            {{ group.title }}
+            <span>{{ group.items|length|fa }} سوال</span>
+          </h2>
+          {% for item in group.items %}
+            <details class="faq-item" data-faq-item>
+              <summary class="faq-q">
+                {{ item.q }}
+                <svg class="icon" aria-hidden="true"><use href="#i-chevron-down"></use></svg>
+              </summary>
+              <div class="faq-a">{{ item.a }}</div>
+            </details>
+          {% endfor %}
+        </section>
+      {% endfor %}
+      <div class="faq-empty" data-faq-empty>برای عبارت جستجو شده سوالی پیدا نشد. عبارت دیگری را امتحان کنید یا با پشتیبانی تماس بگیرید.</div>
+    </div>
+
+    <div class="cta-band" style="margin-top: 30px;">
+      <div>
+        <div class="cta-band__title">پاسخ سوال خود را پیدا نکردید؟</div>
+        <p class="cta-band__desc">کارشناسان آب پاک درباره دستگاه‌ها، فیلترها و شرایط ارسال راهنمایی می‌کنند.</p>
+      </div>
+      <div class="cta-band__actions">
+        <a class="btn btn--primary" href="tel:{{ STORE.phone_raw }}">
+          <svg class="icon" aria-hidden="true"><use href="#i-phone"></use></svg>
+          {{ STORE.phone }}
+        </a>
+        <a class="btn btn--light" href="{% url 'shop:contact' %}">ارسال پیام</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

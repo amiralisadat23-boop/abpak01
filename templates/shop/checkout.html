@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+{% load shop_tags %}
+
+{% block content %}
+<div class="page-head">
+  <div class="container">
+    <nav class="breadcrumb" aria-label="مسیر صفحه">
+      <a href="{% url 'shop:home' %}">خانه</a>
+      <svg class="icon" aria-hidden="true"><use href="#i-chevron-left"></use></svg>
+      <a href="{% url 'shop:cart' %}">سبد خرید</a>
+      <svg class="icon" aria-hidden="true"><use href="#i-chevron-left"></use></svg>
+      <span class="breadcrumb__current">تکمیل سفارش</span>
+    </nav>
+    <h1 class="page-head__title">تکمیل سفارش</h1>
+    <p class="page-head__desc">اطلاعات گیرنده را دقیق وارد کنید. سفارش پس از ثبت، توسط کارشناسان آب پاک بررسی و برای هماهنگی ارسال با شما تماس گرفته می‌شود.</p>
+  </div>
+</div>
+
+<div class="container checkout-layout">
+  <form method="post" novalidate data-checkout-form data-subtotal="{{ totals.subtotal }}" data-free-threshold="{{ FREE_SHIPPING_THRESHOLD }}">
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+      <div class="form-errors">
+        {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+      </div>
+    {% endif %}
+
+    <div class="checkout-card">
+      <div class="checkout-section__head">
+        <span class="checkout-section__num">۱</span>
+        <h2 class="checkout-section__title">اطلاعات گیرنده</h2>
+        <span class="checkout-section__hint">همه فیلدهای ستاره‌دار الزامی هستند</span>
+      </div>
+
+      <div class="form-row">
+        <div class="field {% if form.full_name.errors %}has-error{% endif %}">
+          <label class="field__label" for="{{ form.full_name.id_for_label }}">{{ form.full_name.label }} <span class="req">*</span></label>
+          {{ form.full_name }}
+          {% for error in form.full_name.errors %}<span class="field__error">{{ error }}</span>{% endfor %}
+        </div>
+        <div class="field {% if form.phone.errors %}has-error{% endif %}">
+          <label class="field__label" for="{{ form.phone.id_for_label }}">{{ form.phone.label }} <span class="req">*</span></label>
+          {{ form.phone }}
+          {% for error in form.phone.errors %}<span class="field__error">{{ error }}</span>{% endfor %}
+          <span class="field__hint">شماره موبایل ۱۱ رقمی، برای هماهنگی ارسال</span>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="field {% if form.province.errors %}has-error{% endif %}">
+          <label class="field__label" for="{{ form.province.id_for_label }}">{{ form.province.label }} <span class="req">*</span></label>
+          {{ form.province }}
+          {% for error in form.province.errors %}<span class="field__error">{{ error }}</span>{% endfor %}
+        </div>
+        <div class="field {% if form.city.errors %}has-error{% endif %}">
+          <label class="field__label" for="{{ form.city.id_for_label }}">{{ form.city.label }} <span class="req">*</span></label>
+          {{ form.city }}
+          {% for error in form.city.errors %}<span class="field__error">{{ error }}</span>{% endfor %}
+        </div>
+      </div>
+
+      <div class="field {% if form.address.errors %}has-error{% endif %}">
+        <label class="field__label" for="{{ form.address.id_for_label }}">{{ form.address.label }} <span class="req">*</span></label>
+        {{ form.address }}
+        {% for error in form.address.errors %}<span class="field__error">{{ error }}</span>{% endfor %}
+        <span class="field__hint">خیابان، کوچه، پلاک، طبقه و واحد</span>
+      </div>
+
+      <div class="field {% if form.postal_code.errors %}has-error{% endif %}">
+        <label class="field__label" for="{{ form.postal_code.id_for_label }}">{{ form.postal_code.label }} <span class="req">*</span></label>
+        {{ form.postal_code }}
+        {% for error in form.postal_code.errors %}<span class="field__error">{{ error }}</span>{% endfor %}
+      </div>
+
+      <div class="field {% if form.note.errors %}has-error{% endif %}" style="margin-bottom: 0;">
+        <label class="field__label" for="{{ form.note.id_for_label }}">{{ form.note.label }}</label>
+        {{ form.note }}
+        {% for error in form.note.errors %}<span class="field__error">{{ error }}</span>{% endfor %}
+      </div>
+    </div>
+
+    <div class="checkout-card">
+      <div class="checkout-section__head">
+        <span class="checkout-section__num">۲</span>
+        <h2 class="checkout-section__title">روش ارسال</h2>
+        <span class="checkout-section__hint">هزینه ارسال در مبلغ نهایی محاسبه می‌شود</span>
+      </div>
+      <div class="option-grid">
+        {% for key, method in SHIPPING_METHODS.items %}
+          <label class="option-card">
+            <input type="radio" name="shipping_method" value="{{ key }}"
+                   data-shipping-option data-cost="{{ method.cost }}"
+                   {% if form.shipping_method.value == key or not form.shipping_method.value and key == selected_shipping %}checked{% endif %}>
+            <span class="option-card__body">
+              <span class="option-card__title">
+                {{ method.label }}
+                <span class="option-card__price {% if key == 'post' and totals.subtotal >= FREE_SHIPPING_THRESHOLD %}option-card__price--free{% endif %}">
+                  {% if key == 'post' and totals.subtotal >= FREE_SHIPPING_THRESHOLD %}رایگان{% else %}{{ method.cost|price }} تومان{% endif %}
+                </span>
+              </span>
+              <span class="option-card__desc">{{ method.description }}</span>
+            </span>
+          </label>
+        {% endfor %}
+      </div>
+      {% for error in form.shipping_method.errors %}<span class="field__error">{{ error }}</span>{% endfor %}
+    </div>
+
+    <div class="checkout-card">
+      <div class="checkout-section__head">
+        <span class="checkout-section__num">۳</span>
+        <h2 class="checkout-section__title">روش پرداخت</h2>
+      </div>
+      <div class="option-grid">
+        {% for key, method in PAYMENT_METHODS.items %}
+          <label class="option-card">
+            <input type="radio" name="payment_method" value="{{ key }}"
+                   {% if form.payment_method.value == key or not form.payment_method.value and key == 'cod' %}checked{% endif %}>
+            <span class="option-card__body">
+              <span class="option-card__title">{{ method.label }}</span>
+              <span class="option-card__desc">{{ method.description }}</span>
+            </span>
+          </label>
+        {% endfor %}
+      </div>
+      <div class="payment-note">
+        <svg class="icon" aria-hidden="true"><use href="#i-info"></use></svg>
+        <span>
+          پرداخت آنلاین با درگاه بانکی هنوز فعال نشده است؛ بنابراین سفارش شما با پرداخت در محل یا انتقال بانکی ثبت می‌شود.
+          در صورت انتخاب انتقال بانکی، شماره کارت پس از ثبت سفارش توسط پشتیبانی برای شما ارسال می‌شود.
+        </span>
+      </div>
+      {% for error in form.payment_method.errors %}<span class="field__error">{{ error }}</span>{% endfor %}
+    </div>
+
+    <div class="checkout-form-actions">
+      <a class="back-link" href="{% url 'shop:cart' %}">
+        <svg class="icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg>
+        بازگشت به سبد خرید
+      </a>
+      <button class="btn btn--primary btn--lg" type="submit">
+        <svg class="icon" aria-hidden="true"><use href="#i-check-circle"></use></svg>
+        ثبت نهایی سفارش
+      </button>
+    </div>
+  </form>
+
+  <aside class="cart-summary">
+    <h2 class="cart-summary__title">
+      <svg class="icon" aria-hidden="true"><use href="#i-box"></use></svg>
+      سفارش شما
+    </h2>
+
+    <div class="checkout-summary-items" style="margin-top: 14px;">
+      {% for item in cart_items %}
+        <div class="mini-item">
+          <span class="mini-item__media">
+            {% if item.product.main_image %}
+              <img src="{{ item.product.main_image.image.url }}" alt="{{ item.product.name }}">
+            {% else %}
+              <svg class="icon" aria-hidden="true" style="width:20px;height:20px;margin:14px;color:var(--muted);"><use href="#i-droplet"></use></svg>
+            {% endif %}
+          </span>
+          <span class="mini-item__body">
+            <span class="mini-item__name">{{ item.product.name }}</span>
+            <span class="mini-item__qty">{{ item.quantity|fa }} عدد × {{ item.unit_price|price }} تومان</span>
+          </span>
+          <span class="mini-item__price">{{ item.total_price|price }}</span>
+        </div>
+      {% endfor %}
+    </div>
+
+    <div class="summary-row" style="margin-top: 12px;">
+      <span>جمع کالاها</span>
+      <strong>{{ totals.subtotal|price }} تومان</strong>
+    </div>
+    <div class="summary-row">
+      <span>هزینه ارسال</span>
+      <strong data-checkout-shipping>{% if totals.shipping == 0 %}رایگان{% else %}{{ totals.shipping|price }} تومان{% endif %}</strong>
+    </div>
+    <div class="summary-row summary-row--total">
+      <span>مبلغ قابل پرداخت</span>
+      <strong data-checkout-total>{{ totals.total|price }} تومان</strong>
+    </div>
+
+    <div class="free-shipping" style="margin-top: 4px;">
+      <svg class="icon" aria-hidden="true"><use href="#i-truck"></use></svg>
+      ارسال رایگان با پست پیشتاز برای سفارش‌های بالای {{ FREE_SHIPPING_THRESHOLD_FA }} تومان.
+    </div>
+
+    <ul class="summary-trust">
+      <li><svg class="icon" aria-hidden="true"><use href="#i-shield"></use></svg> ضمانت اصالت کالا و سلامت فیزیکی</li>
+      <li><svg class="icon" aria-hidden="true"><use href="#i-lock"></use></svg> اطلاعات شما محرمانه نگهداری می‌شود</li>
+      <li><svg class="icon" aria-hidden="true"><use href="#i-phone"></use></svg> پشتیبانی: {{ STORE.phone }}</li>
+    </ul>
+
+    <a class="btn btn--ghost btn--block btn--sm" href="{% url 'shop:cart' %}" style="margin-top: 12px;">ویرایش سبد خرید</a>
+  </aside>
+</div>
+{% endblock %}

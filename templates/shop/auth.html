@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+{% load shop_tags %}
+
+{% block content %}
+<div class="container">
+  <div class="auth">
+    <div>
+      <div class="auth-card" style="margin-inline: auto;">
+        <div class="auth-tabs" role="tablist" aria-label="ورود یا ثبت‌نام">
+          <a class="auth-tab {% if active_tab == 'login' %}is-active{% endif %}"
+             href="{% url 'shop:login' %}{% if next_url %}?next={{ next_url|urlencode }}{% endif %}">ورود</a>
+          <a class="auth-tab {% if active_tab == 'register' %}is-active{% endif %}"
+             href="{% url 'shop:register' %}{% if next_url %}?next={{ next_url|urlencode }}{% endif %}">ثبت‌نام</a>
+        </div>
+
+        <!-- ورود -->
+        <div class="auth-form {% if active_tab == 'login' %}is-active{% endif %}">
+          <h1 class="section__title" style="font-size: 20px; margin-bottom: 6px;">ورود به حساب کاربری</h1>
+          <p class="auth-form__hint">با شماره موبایل و رمز عبور خود وارد شوید.</p>
+
+          {% if login_form.non_field_errors %}
+            <div class="form-errors">
+              {% for error in login_form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+            </div>
+          {% endif %}
+
+          <form method="post" action="{% url 'shop:login' %}">
+            {% csrf_token %}
+            {% if next_url %}<input type="hidden" name="next" value="{{ next_url }}">{% endif %}
+
+            <div class="field {% if login_form.phone.errors %}has-error{% endif %}">
+              <label class="field__label" for="{{ login_form.phone.id_for_label }}">{{ login_form.phone.label }}</label>
+              {{ login_form.phone }}
+              {% for error in login_form.phone.errors %}<span class="field__error">{{ error }}</span>{% endfor %}
+            </div>
+
+            <div class="field {% if login_form.password.errors %}has-error{% endif %}">
+              <label class="field__label" for="{{ login_form.password.id_for_label }}">{{ login_form.password.label }}</label>
+              {{ login_form.password }}
+              {% for error in login_form.password.errors %}<span class="field__error">{{ error }}</span>{% endfor %}
+            </div>
+
+            <button class="btn btn--primary btn--block" type="submit">
+              <svg class="icon" aria-hidden="true"><use href="#i-logout"></use></svg>
+              ورود به حساب
+            </button>
+          </form>
+
+          <div class="auth-footer">
+            حساب کاربری ندارید؟
+            <a href="{% url 'shop:register' %}{% if next_url %}?next={{ next_url|urlencode }}{% endif %}">ثبت‌نام کنید</a>
+          </div>
+        </div>
+
+        <!-- ثبت‌نام -->
+        <div class="auth-form {% if active_tab == 'register' %}is-active{% endif %}">
+          <h1 class="section__title" style="font-size: 20px; margin-bottom: 6px;">ساخت حساب کاربری</h1>
+          <p class="auth-form__hint">با ساخت حساب، سفارش‌های خود را در یک‌جا ببینید و اطلاعات تحویل را ذخیره کنید.</p>
+
+          {% if register_form.non_field_errors %}
+            <div class="form-errors">
+              {% for error in register_form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+            </div>
+          {% endif %}
+
+          <form method="post" action="{% url 'shop:register' %}">
+            {% csrf_token %}
+            {% if next_url %}<input type="hidden" name="next" value="{{ next_url }}">{% endif %}
+
+            <div class="field {% if register_form.full_name.errors %}has-error{% endif %}">
+              <label class="field__label" for="{{ register_form.full_name.id_for_label }}">{{ register_form.full_name.label }}</label>
+              {{ register_form.full_name }}
+              {% for error in register_form.full_name.errors %}<span class="field__error">{{ error }}</span>{% endfor %}
+            </div>
+
+            <div class="form-row">
+              <div class="field {% if register_form.phone.errors %}has-error{% endif %}">
+                <label class="field__label" for="{{ register_form.phone.id_for_label }}">{{ register_form.phone.label }}</label>
+                {{ register_form.phone }}
+                {% for error in register_form.phone.errors %}<span class="field__error">{{ error }}</span>{% endfor %}
+              </div>
+              <div class="field {% if register_form.email.errors %}has-error{% endif %}">
+                <label class="field__label" for="{{ register_form.email.id_for_label }}">{{ register_form.email.label }}</label>
+                {{ register_form.email }}
+                {% for error in register_form.email.errors %}<span class="field__error">{{ error }}</span>{% endfor %}
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="field {% if register_form.password1.errors %}has-error{% endif %}">
+                <label class="field__label" for="{{ register_form.password1.id_for_label }}">{{ register_form.password1.label }}</label>
+                {{ register_form.password1 }}
+                {% for error in register_form.password1.errors %}<span class="field__error">{{ error }}</span>{% endfor %}
+              </div>
+              <div class="field {% if register_form.password2.errors %}has-error{% endif %}">
+                <label class="field__label" for="{{ register_form.password2.id_for_label }}">{{ register_form.password2.label }}</label>
+                {{ register_form.password2 }}
+                {% for error in register_form.password2.errors %}<span class="field__error">{{ error }}</span>{% endfor %}
+              </div>
+            </div>
+
+            <p class="password-hint">رمز عبور حداقل ۸ کاراکتر باشد و شامل حروف و اعداد ترکیبی باشد.</p>
+
+            <button class="btn btn--primary btn--block" type="submit">
+              <svg class="icon" aria-hidden="true"><use href="#i-user-circle"></use></svg>
+              ساخت حساب کاربری
+            </button>
+          </form>
+
+          <div class="auth-footer">
+            قبلاً ثبت‌نام کرده‌اید؟
+            <a href="{% url 'shop:login' %}{% if next_url %}?next={{ next_url|urlencode }}{% endif %}">وارد شوید</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <aside class="auth__panel">
+      <h2 class="auth__panel-title">حساب کاربری آب پاک</h2>
+      <p class="auth__panel-desc">
+        خرید دستگاه تصفیه آب نیاز به بررسی دقیق دارد؛ با حساب کاربری، سفارش‌ها و اطلاعات تحویل شما همیشه در دسترس است.
+      </p>
+      <ul class="auth__benefits">
+        <li>
+          <svg class="icon" aria-hidden="true"><use href="#i-box"></use></svg>
+          <span>پیگیری آنلاین سفارش‌ها و مشاهده وضعیت ارسال در هر زمان</span>
+        </li>
+        <li>
+          <svg class="icon" aria-hidden="true"><use href="#i-shield"></use></svg>
+          <span>دسترسی به سابقه خرید و فیلترهای مصرفی دستگاه شما</span>
+        </li>
+        <li>
+          <svg class="icon" aria-hidden="true"><use href="#i-headset"></use></svg>
+          <span>پشتیبانی و مشاوره تخصصی برای نگهداری دستگاه</span>
+        </li>
+      </ul>
+      <div class="auth__panel-foot">
+        <svg class="icon" aria-hidden="true"><use href="#i-lock"></use></svg>
+        اطلاعات شما فقط برای پردازش سفارش استفاده می‌شود.
+      </div>
+      <a class="btn btn--light btn--block" style="margin-top: 20px;" href="tel:{{ STORE.phone_raw }}">
+        <svg class="icon" aria-hidden="true"><use href="#i-phone"></use></svg>
+        {{ STORE.phone }}
+      </a>
+    </aside>
+  </div>
+</div>
+{% endblock %}

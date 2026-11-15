@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+{% load shop_tags %}
+
+{% block content %}
+<div class="page-head">
+  <div class="container">
+    <nav class="breadcrumb" aria-label="مسیر صفحه">
+      <a href="{% url 'shop:home' %}">خانه</a>
+      <svg class="icon" aria-hidden="true"><use href="#i-chevron-left"></use></svg>
+      <span class="breadcrumb__current">حساب کاربری</span>
+    </nav>
+    <h1 class="page-head__title">حساب کاربری</h1>
+    <p class="page-head__desc">خوش آمدید {{ user.get_full_name|default:user.username }}؛ سفارش‌ها، اطلاعات تحویل و پیگیری خریدهای شما در این بخش قرار دارد.</p>
+  </div>
+</div>
+
+<div class="container account-layout">
+  {% include "partials/account_nav.html" with account_section="dashboard" %}
+
+  <div>
+    <div class="account-stats">
+      <div class="stat-card">
+        <span class="stat-card__icon"><svg class="icon" aria-hidden="true"><use href="#i-box"></use></svg></span>
+        <div><strong>{{ stats.orders|fa }}</strong><span>کل سفارش‌ها</span></div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-card__icon stat-card__icon--gold"><svg class="icon" aria-hidden="true"><use href="#i-truck"></use></svg></span>
+        <div><strong>{{ stats.in_progress|fa }}</strong><span>در حال پردازش</span></div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-card__icon stat-card__icon--green"><svg class="icon" aria-hidden="true"><use href="#i-check-circle"></use></svg></span>
+        <div><strong>{{ stats.delivered|fa }}</strong><span>تحویل شده</span></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel__head">
+        <h2 class="panel__title">
+          <svg class="icon" aria-hidden="true"><use href="#i-box"></use></svg>
+          آخرین سفارش‌ها
+        </h2>
+        <a class="panel__link" href="{% url 'shop:account_orders' %}">مشاهده همه سفارش‌ها</a>
+      </div>
+
+      {% if orders %}
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>کد سفارش</th>
+                <th>تاریخ</th>
+                <th>مبلغ</th>
+                <th>وضعیت</th>
+                <th>جزئیات</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for order in orders %}
+                <tr>
+                  <td><span class="data-table__code">{{ order.code }}</span></td>
+                  <td>{{ order.created_at|jalali }}</td>
+                  <td><span class="data-table__price">{{ order.total|price }} تومان</span></td>
+                  <td><span class="status-pill status--{{ order.status }}">{{ order.get_status_display }}</span></td>
+                  <td>
+                    <a class="table-link" href="{{ order.get_absolute_url }}">
+                      مشاهده
+                      <svg class="icon" aria-hidden="true"><use href="#i-chevron-left"></use></svg>
+                    </a>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="empty" style="border: 0; padding: 26px 10px;">
+          <span class="empty__icon" style="width: 56px; height: 56px;">
+            <svg class="icon" aria-hidden="true"><use href="#i-box"></use></svg>
+          </span>
+          <h3 class="empty__title" style="font-size: 14px;">هنوز سفارشی ثبت نکرده‌اید</h3>
+          <p class="empty__desc">با انتخاب دستگاه یا فیلتر مناسب، اولین سفارش خود را ثبت کنید.</p>
+          <div class="empty__actions">
+            <a class="btn btn--primary btn--sm" href="{% url 'shop:catalog' %}">مشاهده محصولات</a>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="panel" id="profile">
+      <div class="panel__head">
+        <h2 class="panel__title">
+          <svg class="icon" aria-hidden="true"><use href="#i-user-circle"></use></svg>
+          اطلاعات حساب و آدرس تحویل
+        </h2>
+        <span class="panel__link" style="color: var(--muted);">ذخیره‌شده برای خریدهای بعدی</span>
+      </div>
+
+      <form method="post" action="{% url 'shop:account' %}#profile">
+        {% csrf_token %}
+        <div class="form-row">
+          <div class="field {% if form.full_name.errors %}has-error{% endif %}">
+            <label class="field__label" for="{{ form.full_name.id_for_label }}">{{ form.full_name.label }}</label>
+            {{ form.full_name }}
+            {% for error in form.full_name.errors %}<span class="field__error">{{ error }}</span>{% endfor %}
+          </div>
+          <div class="field {% if form.email.errors %}has-error{% endif %}">
+            <label class="field__label" for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>
+            {{ form.email }}
+            {% for error in form.email.errors %}<span class="field__error">{{ error }}</span>{% endfor %}
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="field {% if form.phone.errors %}has-error{% endif %}">
+            <label class="field__label" for="{{ form.phone.id_for_label }}">{{ form.phone.label }}</label>
+            {{ form.phone }}
+            {% for error in form.phone.errors %}<span class="field__error">{{ error }}</span>{% endfor %}
+          </div>
+          <div class="field {% if form.province.errors %}has-error{% endif %}">
+            <label class="field__label" for="{{ form.province.id_for_label }}">{{ form.province.label }}</label>
+            {{ form.province }}
+            {% for error in form.province.errors %}<span class="field__error">{{ error }}</span>{% endfor %}
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="field {% if form.city.errors %}has-error{% endif %}">
+            <label class="field__label" for="{{ form.city.id_for_label }}">{{ form.city.label }}</label>
+            {{ form.city }}
+            {% for error in form.city.errors %}<span class="field__error">{{ error }}</span>{% endfor %}
+          </div>
+          <div class="field {% if form.postal_code.errors %}has-error{% endif %}">
+            <label class="field__label" for="{{ form.postal_code.id_for_label }}">{{ form.postal_code.label }}</label>
+            {{ form.postal_code }}
+            {% for error in form.postal_code.errors %}<span class="field__error">{{ error }}</span>{% endfor %}
+          </div>
+        </div>
+
+        <div class="field {% if form.address.errors %}has-error{% endif %}">
+          <label class="field__label" for="{{ form.address.id_for_label }}">{{ form.address.label }}</label>
+          {{ form.address }}
+          {% for error in form.address.errors %}<span class="field__error">{{ error }}</span>{% endfor %}
+        </div>
+
+        <button class="btn btn--primary" type="submit">
+          <svg class="icon" aria-hidden="true"><use href="#i-check"></use></svg>
+          ذخیره اطلاعات
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

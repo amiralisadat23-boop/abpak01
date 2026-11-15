@@ -1,0 +1,102 @@
+{% load shop_tags %}
+<div class="drawer" id="mobileDrawer" aria-hidden="true">
+  <div class="drawer__overlay" data-drawer-close></div>
+  <aside class="drawer__panel" role="dialog" aria-modal="true" aria-label="منوی موبایل">
+    <div class="drawer__head">
+      <a class="brand brand--sm" href="{% url 'shop:home' %}">
+        <span class="brand__mark" aria-hidden="true">
+          {% if site.logo %}
+            <img class="brand__logo" src="{{ site.logo.url }}" alt="">
+          {% else %}
+            {% include "partials/brand_mark.html" %}
+          {% endif %}
+        </span>
+        <span class="brand__text">
+          <strong class="brand__name">{{ site.site_name }}</strong>
+          <span class="brand__sub">{{ site.tagline }}</span>
+        </span>
+      </a>
+      <button type="button" class="icon-btn" data-drawer-close aria-label="بستن منو">
+        <svg class="icon" aria-hidden="true"><use href="#i-close"></use></svg>
+      </button>
+    </div>
+
+    <nav class="drawer__nav" aria-label="منوی موبایل">
+      <a class="drawer__link" href="{% url 'shop:home' %}">
+        <svg class="icon" aria-hidden="true"><use href="#i-home"></use></svg>
+        خانه
+      </a>
+      <a class="drawer__link" href="{% url 'shop:catalog' %}">
+        <svg class="icon" aria-hidden="true"><use href="#i-grid"></use></svg>
+        همه محصولات
+      </a>
+
+      <details class="drawer__group" open>
+        <summary class="drawer__link">
+          <svg class="icon" aria-hidden="true"><use href="#i-filter"></use></svg>
+          دسته‌بندی محصولات
+          <svg class="icon drawer__caret" aria-hidden="true"><use href="#i-chevron-down"></use></svg>
+        </summary>
+        <div class="drawer__sublist">
+          {% for category in nav_categories %}
+            <a href="{{ category.get_absolute_url }}">
+              <svg class="icon" aria-hidden="true"><use href="#i-{{ category.icon }}"></use></svg>
+              {{ category.name }}
+              <span>{{ category.active_count|fa }}</span>
+            </a>
+          {% endfor %}
+        </div>
+      </details>
+
+      <a class="drawer__link" href="{% url 'shop:about' %}">
+        <svg class="icon" aria-hidden="true"><use href="#i-info"></use></svg>
+        درباره ما
+      </a>
+      <a class="drawer__link" href="{% url 'shop:contact' %}">
+        <svg class="icon" aria-hidden="true"><use href="#i-headset"></use></svg>
+        تماس با ما
+      </a>
+      <a class="drawer__link" href="{% url 'shop:faq' %}">
+        <svg class="icon" aria-hidden="true"><use href="#i-file"></use></svg>
+        سوالات متداول
+      </a>
+      <a class="drawer__link" href="{% url 'shop:track_order' %}">
+        <svg class="icon" aria-hidden="true"><use href="#i-box"></use></svg>
+        پیگیری سفارش
+      </a>
+    </nav>
+
+    <div class="drawer__account">
+      {% if user.is_authenticated %}
+        <a class="btn btn--outline btn--block" href="{% url 'shop:account' %}">
+          <svg class="icon" aria-hidden="true"><use href="#i-user-circle"></use></svg>
+          حساب کاربری من
+        </a>
+      {% else %}
+        <a class="btn btn--primary btn--block" href="{% url 'shop:login' %}">ورود</a>
+        <a class="btn btn--ghost btn--block" href="{% url 'shop:register' %}">ساخت حساب کاربری</a>
+      {% endif %}
+    </div>
+
+    <div class="drawer__contact">
+      <a href="tel:{{ STORE.phone_raw }}">
+        <svg class="icon" aria-hidden="true"><use href="#i-phone"></use></svg>
+        {{ STORE.phone }}
+      </a>
+      <span>
+        <svg class="icon" aria-hidden="true"><use href="#i-clock"></use></svg>
+        {{ STORE.hours }}
+      </span>
+      <a href="{{ STORE.whatsapp }}" target="_blank" rel="noopener">
+        <svg class="icon" aria-hidden="true"><use href="#i-whatsapp"></use></svg>
+        مشاوره در واتساپ
+      </a>
+      {% if STORE.tapsi_shop %}
+        <a href="{{ STORE.tapsi_shop }}" target="_blank" rel="noopener">
+          <svg class="icon" aria-hidden="true"><use href="#i-external"></use></svg>
+          خرید از تپسی‌شاپ
+        </a>
+      {% endif %}
+    </div>
+  </aside>
+</div>

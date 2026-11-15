@@ -1,0 +1,122 @@
+{% load shop_tags %}
+{% now "Y" as current_year %}
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer__top">
+      <div class="footer__brand">
+        <a class="brand" href="{% url 'shop:home' %}" aria-label="{{ site.site_name }}">
+          <span class="brand__mark" aria-hidden="true">
+            {% if site.logo %}
+              <img class="brand__logo" src="{{ site.logo.url }}" alt="">
+            {% else %}
+              {% include "partials/brand_mark.html" %}
+            {% endif %}
+          </span>
+          <span class="brand__text">
+            <strong class="brand__name">{{ site.site_name }}</strong>
+            <span class="brand__sub">{{ site.site_name_en }} · {{ site.tagline }}</span>
+          </span>
+        </a>
+        <p class="footer__about">
+          آب پاک، فروشگاه تخصصی تجهیزات تصفیه آب خانگی و صنعتی؛ از دستگاه‌های اسمز معکوس و فیلترها تا ممبران، پمپ و قطعات اصلی، همراه با مشاوره تخصصی و ضمانت اصالت کالا.
+        </p>
+        <div class="footer__contacts">
+          <a href="tel:{{ STORE.phone_raw }}">
+            <svg class="icon" aria-hidden="true"><use href="#i-phone"></use></svg>
+            <span>{{ STORE.phone }}</span>
+          </a>
+          <a href="mailto:{{ STORE.email }}">
+            <svg class="icon" aria-hidden="true"><use href="#i-mail"></use></svg>
+            <span>{{ STORE.email }}</span>
+          </a>
+          <span>
+            <svg class="icon" aria-hidden="true"><use href="#i-map-pin"></use></svg>
+            <span>{{ STORE.address }}</span>
+          </span>
+        </div>
+        <div class="footer__badges" aria-label="مزایای خرید">
+          <span class="footer__badge">ضمانت اصالت کالا</span>
+          <span class="footer__badge">ارسال به سراسر ایران</span>
+          <span class="footer__badge">پرداخت در محل</span>
+        </div>
+      </div>
+
+      <div class="footer__nav">
+        <h3 class="footer__col-title">دسترسی سریع</h3>
+        <ul class="footer__links">
+          <li><a href="{% url 'shop:home' %}">صفحه اصلی</a></li>
+          <li><a href="{% url 'shop:catalog' %}">همه محصولات</a></li>
+          <li><a href="{% url 'shop:track_order' %}">پیگیری سفارش</a></li>
+          <li><a href="{% url 'shop:faq' %}">سوالات متداول</a></li>
+          <li><a href="{% url 'shop:about' %}">درباره آب پاک</a></li>
+          <li><a href="{% url 'shop:contact' %}">تماس با ما</a></li>
+          {% if STORE.tapsi_shop %}
+            <li><a href="{{ STORE.tapsi_shop }}" target="_blank" rel="noopener">فروشگاه ما در تپسی‌شاپ</a></li>
+          {% endif %}
+        </ul>
+
+        <h3 class="footer__col-title footer__col-title--spaced">راهنمای خرید</h3>
+        <ul class="footer__links">
+          <li><a href="{% url 'shop:faq' %}#faq-shipping">شرایط ارسال و پرداخت</a></li>
+          <li><a href="{% url 'shop:faq' %}#faq-warranty">گارانتی و خدمات پس از فروش</a></li>
+          <li><a href="{% url 'shop:faq' %}">راهنمای انتخاب دستگاه</a></li>
+        </ul>
+      </div>
+
+      <div class="footer__col--contact">
+        <h3 class="footer__col-title">مشاوره تخصصی</h3>
+        <p class="footer__note">
+          {{ STORE.hours }}
+          <br>
+          برای انتخاب دستگاه، فیلتر مناسب یا پیگیری سفارش با کارشناسان ما در تماس باشید.
+        </p>
+        <a class="footer__pill" href="tel:{{ STORE.phone_raw }}">
+          <svg class="icon" aria-hidden="true"><use href="#i-headset"></use></svg>
+          تماس با کارشناس
+        </a>
+
+        <div class="footer__contacts footer__contacts--support">
+          <span>
+            <svg class="icon" aria-hidden="true"><use href="#i-truck"></use></svg>
+            <span>ارسال به سراسر ایران با پست پیشتاز و باربری</span>
+          </span>
+          <span>
+            <svg class="icon" aria-hidden="true"><use href="#i-shield"></use></svg>
+            <span>ضمانت اصالت و سلامت فیزیکی کالا</span>
+          </span>
+          <span>
+            <svg class="icon" aria-hidden="true"><use href="#i-clock"></use></svg>
+            <span>پشتیبانی تلفنی: {{ STORE.hours }}</span>
+          </span>
+        </div>
+
+        <div class="footer__socials">
+          <a class="footer__social" href="{{ STORE.instagram }}" target="_blank" rel="noopener" aria-label="اینستاگرام آب پاک">
+            <svg class="icon" aria-hidden="true"><use href="#i-instagram"></use></svg>
+          </a>
+          <a class="footer__social" href="{{ STORE.telegram }}" target="_blank" rel="noopener" aria-label="تلگرام آب پاک">
+            <svg class="icon" aria-hidden="true"><use href="#i-telegram"></use></svg>
+          </a>
+          <a class="footer__social" href="{{ STORE.whatsapp }}" target="_blank" rel="noopener" aria-label="واتساپ آب پاک">
+            <svg class="icon" aria-hidden="true"><use href="#i-whatsapp"></use></svg>
+          </a>
+          {% if STORE.tapsi_shop %}
+            <a class="footer__social" href="{{ STORE.tapsi_shop }}" target="_blank" rel="noopener" aria-label="فروشگاه آب پاک در تپسی‌شاپ">
+              <svg class="icon" aria-hidden="true"><use href="#i-external"></use></svg>
+            </a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="footer__bottom">
+      <span>© {{ current_year|fa }} فروشگاه اینترنتی {{ site.site_name }} | تمامی حقوق محفوظ است.</span>
+      <div class="footer__bottom-links">
+        <a href="{% url 'shop:about' %}">درباره ما</a>
+        <a href="{% url 'shop:contact' %}">تماس با ما</a>
+        <a href="{% url 'shop:faq' %}">سوالات متداول</a>
+        <a href="{% url 'shop:track_order' %}">پیگیری سفارش</a>
+      </div>
+    </div>
+  </div>
+</footer>

@@ -1,0 +1,100 @@
+{% extends "panel/base.html" %}
+{% load shop_tags %}
+
+{% block content %}
+<div class="p-stats">
+  <div class="p-stat p-stat--blue">
+    <span class="p-stat__icon"><svg class="icon"><use href="#i-box"></use></svg></span>
+    <div><strong>{{ stats.orders|fa }}</strong><span>کل سفارش‌ها</span></div>
+  </div>
+  <div class="p-stat">
+    <span class="p-stat__icon"><svg class="icon"><use href="#i-calendar"></use></svg></span>
+    <div><strong>{{ stats.today_orders|fa }}</strong><span>سفارش امروز</span></div>
+  </div>
+  <div class="p-stat">
+    <span class="p-stat__icon"><svg class="icon"><use href="#i-clock"></use></svg></span>
+    <div><strong>{{ stats.pending|fa }}</strong><span>در انتظار بررسی</span></div>
+  </div>
+  <div class="p-stat">
+    <span class="p-stat__icon p-stat__icon--green"><svg class="icon"><use href="#i-wallet"></use></svg></span>
+    <div><strong>{{ stats.revenue|price }}</strong><span>جمع فروش (تومان)</span></div>
+  </div>
+  <div class="p-stat">
+    <span class="p-stat__icon"><svg class="icon"><use href="#i-package"></use></svg></span>
+    <div><strong>{{ stats.products|fa }}</strong><span>محصول فعال</span></div>
+  </div>
+  <div class="p-stat">
+    <span class="p-stat__icon p-stat__icon--red"><svg class="icon"><use href="#i-alert"></use></svg></span>
+    <div><strong>{{ stats.low_stock|fa }}</strong><span>کالای کم‌موجود</span></div>
+  </div>
+</div>
+
+<div class="p-grid">
+  <section class="p-card">
+    <div class="p-card__head">
+      <h2>آخرین سفارش‌ها</h2>
+      <a class="p-link" href="{% url 'panel:orders' %}">همه سفارش‌ها <svg class="icon"><use href="#i-arrow-left"></use></svg></a>
+    </div>
+    <div class="p-table-wrap">
+      <table class="p-table">
+        <thead>
+          <tr><th>کد</th><th>مشتری</th><th>مبلغ</th><th>وضعیت</th><th></th></tr>
+        </thead>
+        <tbody>
+          {% for order in recent_orders %}
+            <tr>
+              <td><span class="p-code">{{ order.code }}</span><small>{{ order.created_at|jalali }}</small></td>
+              <td>{{ order.full_name }}<small>{{ order.phone|fa }}</small></td>
+              <td>{{ order.total|price }} <small>تومان</small></td>
+              <td><span class="p-badge p-badge--{{ order.status }}">{{ order.get_status_display }}</span></td>
+              <td><a class="p-link" href="{% url 'panel:order_edit' order.code %}">مدیریت</a></td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="5" class="p-empty">هنوز سفارشی ثبت نشده است.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <aside class="p-card">
+    <div class="p-card__head"><h2>اقدام‌های سریع</h2></div>
+    <div class="p-actions">
+      <a class="p-action" href="{% url 'panel:settings' %}">
+        <span class="p-action__icon"><svg class="icon"><use href="#i-sliders"></use></svg></span>
+        <span><strong>شخصی‌سازی سایت</strong><small>فونت، لوگو، تصویر هیرو و اطلاعات تماس</small></span>
+        <svg class="icon p-action__arrow"><use href="#i-chevron-left"></use></svg>
+      </a>
+      <a class="p-action" href="{% url 'panel:products' %}">
+        <span class="p-action__icon"><svg class="icon"><use href="#i-box"></use></svg></span>
+        <span><strong>مدیریت محصولات</strong><small>قیمت، موجودی و تصاویر محصولات</small></span>
+        <svg class="icon p-action__arrow"><use href="#i-chevron-left"></use></svg>
+      </a>
+      <a class="p-action" href="{% url 'panel:messages' %}">
+        <span class="p-action__icon"><svg class="icon"><use href="#i-mail"></use></svg></span>
+        <span><strong>پیام‌های مشتریان</strong><small>{{ stats.unread|fa }} پیام خوانده‌نشده</small></span>
+        <svg class="icon p-action__arrow"><use href="#i-chevron-left"></use></svg>
+      </a>
+    </div>
+  </aside>
+</div>
+
+<section class="p-card p-card--spaced">
+  <div class="p-card__head">
+    <h2>کالاهای کم‌موجود</h2>
+    <a class="p-link" href="{% url 'panel:products' %}?q=">مشاهده همه</a>
+  </div>
+  {% if low_stock %}
+    <div class="p-list">
+      {% for product in low_stock %}
+        <a class="p-list__row" href="{% url 'panel:product_edit' product.pk %}">
+          <span>{{ product.name }}</span>
+          <small>{{ product.stock|fa }} عدد در انبار</small>
+        </a>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="p-empty">همه کالاها موجودی کافی دارند.</p>
+  {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+{% load shop_tags %}
+
+{% block content %}
+<div class="page-head">
+  <div class="container">
+    <nav class="breadcrumb" aria-label="مسیر صفحه">
+      <a href="{% url 'shop:home' %}">خانه</a>
+      <svg class="icon" aria-hidden="true"><use href="#i-chevron-left"></use></svg>
+      <span class="breadcrumb__current">تماس با ما</span>
+    </nav>
+    <h1 class="page-head__title">تماس با آب پاک</h1>
+    <p class="page-head__desc">برای مشاوره خرید، پیگیری سفارش یا سوالات فنی درباره دستگاه‌های تصفیه آب با ما در ارتباط باشید.</p>
+  </div>
+</div>
+
+<div class="container contact-grid">
+  <div>
+    <div class="contact-cards">
+      <div class="contact-card">
+        <span class="contact-card__icon"><svg class="icon" aria-hidden="true"><use href="#i-phone"></use></svg></span>
+        <div>
+          <div class="contact-card__label">تلفن فروشگاه</div>
+          <div class="contact-card__value"><a href="tel:{{ STORE.phone_raw }}">{{ STORE.phone }}</a></div>
+        </div>
+      </div>
+      <div class="contact-card">
+        <span class="contact-card__icon"><svg class="icon" aria-hidden="true"><use href="#i-whatsapp"></use></svg></span>
+        <div>
+          <div class="contact-card__label">مشاوره در واتساپ</div>
+          <div class="contact-card__value"><a href="{{ STORE.whatsapp }}" target="_blank" rel="noopener">{{ STORE.mobile }}</a></div>
+        </div>
+      </div>
+      <div class="contact-card">
+        <span class="contact-card__icon"><svg class="icon" aria-hidden="true"><use href="#i-mail"></use></svg></span>
+        <div>
+          <div class="contact-card__label">ایمیل</div>
+          <div class="contact-card__value"><a href="mailto:{{ STORE.email }}">{{ STORE.email }}</a></div>
+        </div>
+      </div>
+      <div class="contact-card">
+        <span class="contact-card__icon"><svg class="icon" aria-hidden="true"><use href="#i-clock"></use></svg></span>
+        <div>
+          <div class="contact-card__label">ساعت پاسخگویی</div>
+          <div class="contact-card__value contact-card__value--text">{{ STORE.hours }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="contact-form-card">
+      <div class="panel__head">
+        <h2 class="panel__title">
+          <svg class="icon" aria-hidden="true"><use href="#i-file"></use></svg>
+          ارسال پیام به پشتیبانی
+        </h2>
+        <span class="panel__link" style="color: var(--muted);">پاسخ در اولین فرصت کاری</span>
+      </div>
+
+      {% if form.non_field_errors %}
+        <div class="form-errors">
+          {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+        </div>
+      {% endif %}
+
+      <form method="post" action="{% url 'shop:contact' %}" novalidate>
+        {% csrf_token %}
+        <div class="form-row">
+          <div class="field {% if form.full_name.errors %}has-error{% endif %}">
+            <label class="field__label" for="{{ form.full_name.id_for_label }}">{{ form.full_name.label }} <span class="req">*</span></label>
+            {{ form.full_name }}
+            {% for error in form.full_name.errors %}<span class="field__error">{{ error }}</span>{% endfor %}
+          </div>
+          <div class="field {% if form.phone.errors %}has-error{% endif %}">
+            <label class="field__label" for="{{ form.phone.id_for_label }}">{{ form.phone.label }} <span class="req">*</span></label>
+            {{ form.phone }}
+            {% for error in form.phone.errors %}<span class="field__error">{{ error }}</span>{% endfor %}
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="field {% if form.email.errors %}has-error{% endif %}">
+            <label class="field__label" for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>
+            {{ form.email }}
+            {% for error in form.email.errors %}<span class="field__error">{{ error }}</span>{% endfor %}
+          </div>
+          <div class="field {% if form.subject.errors %}has-error{% endif %}">
+            <label class="field__label" for="{{ form.subject.id_for_label }}">{{ form.subject.label }} <span class="req">*</span></label>
+            {{ form.subject }}
+            {% for error in form.subject.errors %}<span class="field__error">{{ error }}</span>{% endfor %}
+          </div>
+        </div>
+
+        <div class="field {% if form.message.errors %}has-error{% endif %}">
+          <label class="field__label" for="{{ form.message.id_for_label }}">{{ form.message.label }} <span class="req">*</span></label>
+          {{ form.message }}
+          {% for error in form.message.errors %}<span class="field__error">{{ error }}</span>{% endfor %}
+        </div>
+
+        <button class="btn btn--primary" type="submit">
+          <svg class="icon" aria-hidden="true"><use href="#i-mail"></use></svg>
+          ارسال پیام
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <aside class="info-side">
+    <div class="side-card">
+      <h3 class="side-card__title">
+        <svg class="icon" aria-hidden="true"><use href="#i-map-pin"></use></svg>
+        نشانی فروشگاه
+      </h3>
+      <p class="side-list" style="margin: 0;">{{ STORE.address }}</p>
+      <div class="map-box">
+        <svg class="icon" aria-hidden="true"><use href="#i-map-pin"></use></svg>
+        <strong>محل نمایش نقشه</strong>
+        <span>برای فعال‌سازی نقشه، موقعیت مکانی فروشگاه را در تنظیمات سایت ثبت کنید.</span>
+      </div>
+    </div>
+
+    <div class="side-card">
+      <h3 class="side-card__title">
+        <svg class="icon" aria-hidden="true"><use href="#i-clock"></use></svg>
+        ساعت کاری
+      </h3>
+      <div class="hours-list">
+        <div><span>شنبه تا چهارشنبه</span><strong>۹:۰۰ تا ۲۱:۰۰</strong></div>
+        <div><span>پنجشنبه</span><strong>۹:۰۰ تا ۱۸:۰۰</strong></div>
+        <div><span>جمعه</span><strong>پاسخگویی آنلاین</strong></div>
+      </div>
+      <p class="field__hint" style="margin-top: 12px;">پاسخ به پیام‌های ثبت‌شده در فرم، در اولین فرصت کاری انجام می‌شود.</p>
+    </div>
+
+    <div class="side-card">
+      <h3 class="side-card__title">
+        <svg class="icon" aria-hidden="true"><use href="#i-sparkles"></use></svg>
+        ما را دنبال کنید
+      </h3>
+      <div class="social-row">
+        <a href="{{ STORE.instagram }}" target="_blank" rel="noopener" aria-label="اینستاگرام">
+          <svg class="icon" aria-hidden="true"><use href="#i-instagram"></use></svg>
+        </a>
+        <a href="{{ STORE.telegram }}" target="_blank" rel="noopener" aria-label="تلگرام">
+          <svg class="icon" aria-hidden="true"><use href="#i-telegram"></use></svg>
+        </a>
+        <a href="{{ STORE.whatsapp }}" target="_blank" rel="noopener" aria-label="واتساپ">
+          <svg class="icon" aria-hidden="true"><use href="#i-whatsapp"></use></svg>
+        </a>
+      </div>
+      <p class="field__hint" style="margin-top: 12px;">برای دیدن محصولات جدید و نکات نگهداری دستگاه تصفیه آب، ما را دنبال کنید.</p>
+    </div>
+  </aside>
+</div>
+{% endblock %}

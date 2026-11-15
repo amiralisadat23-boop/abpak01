@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+{% load shop_tags %}
+
+{% block content %}
+<section class="page-hero">
+  <div class="container">
+    <nav class="breadcrumb" aria-label="مسیر صفحه">
+      <a href="{% url 'shop:home' %}">خانه</a>
+      <svg class="icon" aria-hidden="true"><use href="#i-chevron-left"></use></svg>
+      <span class="breadcrumb__current">درباره ما</span>
+    </nav>
+    <span class="page-hero__eyebrow">
+      <svg class="icon" aria-hidden="true"><use href="#i-droplet"></use></svg>
+      تخصص ما فقط آب است
+    </span>
+    <h1 class="page-hero__title">آب پاک، همراه شما برای انتخاب تجهیزات مناسب تصفیه آب</h1>
+    <p class="page-hero__desc">
+      ما یک فروشگاه تخصصی در حوزه تصفیه آب هستیم؛ از دستگاه‌های خانگی و صنعتی تا فیلتر، ممبران و اتصالات.
+      هدف ما این است که انتخاب تجهیزات تصفیه آب برای شما ساده، شفاف و مطمئن باشد.
+    </p>
+  </div>
+</section>
+
+<section class="content-section">
+  <div class="container">
+    <div class="content-split">
+      <div class="about-split__art" aria-hidden="true" style="min-height: 380px;">
+        <svg viewBox="0 0 420 340" role="img" aria-label="تجهیزات تصفیه آب آب پاک">
+          <defs>
+            <linearGradient id="ab-water" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#8ee0fb"/>
+              <stop offset="1" stop-color="#1f7fc4"/>
+            </linearGradient>
+          </defs>
+          <circle cx="210" cy="160" r="130" fill="#2f9fdc" opacity="0.14"/>
+          <circle cx="210" cy="160" r="104" fill="none" stroke="#8ed7f5" stroke-opacity="0.28" stroke-dasharray="4 8"/>
+          <rect x="126" y="82" width="168" height="150" rx="22" fill="#eaf4fb" opacity="0.92"/>
+          <rect x="146" y="100" width="128" height="46" rx="12" fill="#0b2745" opacity="0.9"/>
+          <circle cx="162" cy="165" r="5" fill="#4ccb96"/>
+          <circle cx="182" cy="165" r="5" fill="#f2b23e"/>
+          <rect x="146" y="184" width="70" height="8" rx="4" fill="#b9d3e6"/>
+          <rect x="146" y="200" width="46" height="6" rx="3" fill="#cfe0ee"/>
+          <path d="M294 118h34a12 12 0 0 1 12 12v42" fill="none" stroke="#dfeaf3" stroke-width="11" stroke-linecap="round"/>
+          <path d="M340 180c0 18-2 26-2 40" stroke="url(#ab-water)" stroke-width="5" stroke-linecap="round" opacity="0.85"/>
+          <path d="M318 228h52l-5 62a26 26 0 0 1-21 24 26 26 0 0 1-21-24Z" fill="#ffffff" opacity="0.1" stroke="#ffffff" stroke-opacity="0.35"/>
+          <path d="M322 254h44l-4 36a22 22 0 0 1-18 20 22 22 0 0 1-18-20Z" fill="url(#ab-water)" opacity="0.85"/>
+          <ellipse cx="344" cy="254" rx="22" ry="5" fill="#c9f0ff" opacity="0.7"/>
+          <ellipse cx="210" cy="300" rx="150" ry="16" fill="#020e19" opacity="0.28"/>
+          <path d="M70 294c34-14 68-14 102 0s68 14 102 0 44-10 66-3" fill="none" stroke="#8ed7f5" stroke-opacity="0.35" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+        <div class="about-split__badge">
+          <svg class="icon" aria-hidden="true"><use href="#i-shield"></use></svg>
+          <div>
+            تجهیزات تخصصی تصفیه آب
+            <span>خانگی، صنعتی و قطعات یدکی</span>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <span class="eyebrow">داستان آب پاک</span>
+        <h2 class="section__title">تخصص، شفافیت و همراهی در تمام مسیر</h2>
+        <p class="section__subtitle">
+          آب پاک با تمرکز بر تجهیزات تصفیه آب شکل گرفته است. ما محصولات عمومی نمی‌فروشیم؛
+          هر کالای فروشگاه ما باید در زنجیره تصفیه آب کاربردی روشن داشته باشد: از فیلتر رسوب‌گیر
+          و ممبران تا پمپ، مخزن و اتصالات.
+        </p>
+        <ul class="about-list">
+          <li>
+            <svg class="icon" aria-hidden="true"><use href="#i-check"></use></svg>
+            <span><strong>مشاوره بر اساس شرایط شما:</strong> کیفیت آب، تعداد نفرات، فضای نصب و بودجه شما مبنای پیشنهاد ما است، نه فروش گران‌ترین دستگاه.</span>
+          </li>
+          <li>
+            <svg class="icon" aria-hidden="true"><use href="#i-check"></use></svg>
+            <span><strong>مشخصات شفاف کالا:</strong> برای هر محصول، مشخصات فنی، سازگاری، شرایط گارانتی و کاربرد دقیق ذکر شده است.</span>
+          </li>
+          <li>
+            <svg class="icon" aria-hidden="true"><use href="#i-check"></use></svg>
+            <span><strong>پشتیبانی پس از خرید:</strong> راهنمای نصب، زمان‌بندی تعویض فیلتر و پاسخ به سوالات فنی، بخشی از خدمات ماست.</span>
+          </li>
+        </ul>
+        <div class="stats-row">
+          <div class="stat-box"><strong>۱۰</strong><span>سال تجربه تخصصی</span></div>
+          <div class="stat-box"><strong>۷</strong><span>دسته‌بندی تخصصی</span></div>
+          <div class="stat-box"><strong>۳۵</strong><span>کالای فعال</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section section--alt">
+  <div class="container">
+    <div class="section__head">
+      <div>
+        <span class="eyebrow">ارزش‌های ما</span>
+        <h2 class="section__title">چرا آب پاک را انتخاب می‌کنند؟</h2>
+        <p class="section__subtitle">سه اصل ساده که رفتار ما در انتخاب محصول، قیمت‌گذاری و پشتیبانی را مشخص می‌کند.</p>
+      </div>
+    </div>
+    <div class="values-grid">
+      <div class="value-card">
+        <span class="value-card__icon"><svg class="icon" aria-hidden="true"><use href="#i-award"></use></svg></span>
+        <h3>تخصص در تصفیه آب</h3>
+        <p>تمرکز کامل روی دستگاه‌ها، فیلترها و قطعات تصفیه آب؛ بدون محصولات متفرقه و نامرتبط.</p>
+      </div>
+      <div class="value-card">
+        <span class="value-card__icon value-card__icon--gold"><svg class="icon" aria-hidden="true"><use href="#i-shield"></use></svg></span>
+        <h3>اصالت و کیفیت</h3>
+        <p>کالاها با ضمانت اصالت و سلامت فیزیکی عرضه می‌شوند و مشخصات فنی آن‌ها شفاف است.</p>
+      </div>
+      <div class="value-card">
+        <span class="value-card__icon value-card__icon--green"><svg class="icon" aria-hidden="true"><use href="#i-headset"></use></svg></span>
+        <h3>همراهی واقعی</h3>
+        <p>پاسخگویی تلفنی برای انتخاب دستگاه، نصب و نگهداری؛ حتی اگر خرید شما کوچک باشد.</p>
+      </div>
+      <div class="value-card">
+        <span class="value-card__icon"><svg class="icon" aria-hidden="true"><use href="#i-truck"></use></svg></span>
+        <h3>ارسال مطمئن</h3>
+        <p>بسته‌بندی ضدضربه، ارسال با پست پیشتاز و باربری برای کالاهای حجیم به سراسر ایران.</p>
+      </div>
+      <div class="value-card">
+        <span class="value-card__icon value-card__icon--gold"><svg class="icon" aria-hidden="true"><use href="#i-credit-card"></use></svg></span>
+        <h3>پرداخت شفاف</h3>
+        <p>پرداخت در محل و انتقال بانکی؛ هزینه ارسال پیش از ثبت نهایی نمایش داده می‌شود.</p>
+      </div>
+      <div class="value-card">
+        <span class="value-card__icon value-card__icon--green"><svg class="icon" aria-hidden="true"><use href="#i-refresh"></use></svg></span>
+        <h3>پیگیری ساده</h3>
+        <p>با کد سفارش و شماره تماس، وضعیت پردازش و ارسال را بدون تماس تلفنی ببینید.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section__head">
+      <div>
+        <span class="eyebrow">مسیر خرید</span>
+        <h2 class="section__title">از انتخاب تا نصب، <span>چهار قدم</span></h2>
+        <p class="section__subtitle">فرآیند خرید در آب پاک ساده و قابل پیگیری است.</p>
+      </div>
+    </div>
+    <div class="process-grid">
+      <div class="process-card">
+        <div class="process-card__num">۰۱</div>
+        <h3>انتخاب و مشاوره</h3>
+        <p>دسته‌بندی مناسب را ببینید یا با کارشناسان ما تماس بگیرید تا دستگاه مناسب شرایط شما پیشنهاد شود.</p>
+      </div>
+      <div class="process-card">
+        <div class="process-card__num">۰۲</div>
+        <h3>ثبت سفارش</h3>
+        <p>محصول را به سبد اضافه کنید، اطلاعات تحویل را وارد کنید و کد سفارش را دریافت کنید.</p>
+      </div>
+      <div class="process-card">
+        <div class="process-card__num">۰۳</div>
+        <h3>بررسی و ارسال</h3>
+        <p>موجودی و سلامت کالا بررسی می‌شود؛ سفارش با بسته‌بندی مناسب به پست یا باربری تحویل می‌شود.</p>
+      </div>
+      <div class="process-card">
+        <div class="process-card__num">۰۴</div>
+        <h3>نصب و پشتیبانی</h3>
+        <p>راهنمای نصب، زمان‌بندی تعویض فیلتر و پشتیبانی فنی برای استفاده درست از دستگاه ارائه می‌شود.</p>
+      </div>
+    </div>
+
+    <div class="cta-band about-cta">
+      <div>
+        <div class="cta-band__title">برای انتخاب دستگاه مطمئن نیستید؟</div>
+        <p class="cta-band__desc">کارشناسان آب پاک با شما درباره کیفیت آب، مصرف روزانه و فضای نصب صحبت می‌کنند.</p>
+      </div>
+      <div class="cta-band__actions">
+        <a class="btn btn--primary" href="tel:{{ STORE.phone_raw }}">
+          <svg class="icon" aria-hidden="true"><use href="#i-phone"></use></svg>
+          تماس با کارشناس
+        </a>
+        <a class="btn btn--light" href="{% url 'shop:contact' %}">ارسال پیام</a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

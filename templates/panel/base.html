@@ -1,0 +1,103 @@
+{% load static %}<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-theme="light" style="--font: {{ site.font_stack }};">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ page_title|default:"پنل مدیریت" }} | {{ site.site_name }}</title>
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#f4f9ff">
+  <link rel="icon" type="image/svg+xml" href="{% static 'img/favicon.svg' %}">
+  <link rel="preload" href="{% static 'fonts/Vazirmatn-400.woff2' %}" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="{% static 'fonts/Vazirmatn-600.woff2' %}" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="{% static 'fonts/Vazirmatn-800.woff2' %}" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="{% static 'css/main.css' %}?v=5">
+  <link rel="stylesheet" href="{% static 'css/pages.css' %}?v=5">
+  <link rel="stylesheet" href="{% static 'css/panel.css' %}?v=5">
+</head>
+<body class="panel-body">
+  {% include "partials/icons.html" %}
+  <div class="panel-shell">
+    <aside class="panel-side">
+      <a class="panel-brand" href="{% url 'panel:dashboard' %}">
+        {% if site.logo %}
+          <img src="{{ site.logo.url }}" alt="{{ site.site_name }}">
+        {% else %}
+          <span class="panel-brand__mark">{% include "partials/brand_mark.html" %}</span>
+        {% endif %}
+        <span>
+          <strong>{{ site.site_name }}</strong>
+          <small>پنل مدیریت</small>
+        </span>
+      </a>
+
+      <nav class="panel-nav" aria-label="منوی پنل">
+        <a class="panel-nav__link {% if panel_section == 'dashboard' %}is-active{% endif %}" href="{% url 'panel:dashboard' %}">
+          <svg class="icon" aria-hidden="true"><use href="#i-grid"></use></svg>
+          داشبورد
+        </a>
+        <a class="panel-nav__link {% if panel_section == 'settings' %}is-active{% endif %}" href="{% url 'panel:settings' %}">
+          <svg class="icon" aria-hidden="true"><use href="#i-sliders"></use></svg>
+          شخصی‌سازی سایت
+        </a>
+        <a class="panel-nav__link {% if panel_section == 'products' %}is-active{% endif %}" href="{% url 'panel:products' %}">
+          <svg class="icon" aria-hidden="true"><use href="#i-box"></use></svg>
+          محصولات
+        </a>
+        <a class="panel-nav__link {% if panel_section == 'orders' %}is-active{% endif %}" href="{% url 'panel:orders' %}">
+          <svg class="icon" aria-hidden="true"><use href="#i-truck"></use></svg>
+          سفارش‌ها
+        </a>
+        <a class="panel-nav__link {% if panel_section == 'messages' %}is-active{% endif %}" href="{% url 'panel:messages' %}">
+          <svg class="icon" aria-hidden="true"><use href="#i-mail"></use></svg>
+          پیام‌ها
+        </a>
+      </nav>
+
+      <div class="panel-side__foot">
+        <a class="panel-side__mini" href="{% url 'shop:home' %}" target="_blank" rel="noopener" aria-label="مشاهده سایت">
+          <svg class="icon" aria-hidden="true"><use href="#i-external"></use></svg>
+          <span>مشاهده سایت</span>
+        </a>
+        <a class="panel-side__mini" href="/admin/" aria-label="ادمین جنگو">
+          <svg class="icon" aria-hidden="true"><use href="#i-shield"></use></svg>
+          <span>ادمین جنگو</span>
+        </a>
+        <form action="{% url 'admin:logout' %}" method="post">
+          {% csrf_token %}
+          <button class="panel-side__mini panel-side__mini--logout" type="submit" aria-label="خروج از پنل">
+            <svg class="icon" aria-hidden="true"><use href="#i-logout"></use></svg>
+            <span>خروج از پنل</span>
+          </button>
+        </form>
+      </div>
+    </aside>
+
+    <div class="panel-main">
+      <header class="panel-top">
+        <div>
+          <h1>{{ page_title|default:"پنل مدیریت" }}</h1>
+          <p>مدیریت و شخصی‌سازی فروشگاه {{ site.site_name }}</p>
+        </div>
+        <div class="panel-user">
+          <span class="panel-user__avatar">{{ user.get_full_name|default:user.username|first }}</span>
+          <span>
+            <strong>{{ user.get_full_name|default:user.username }}</strong>
+            <small>مدیر فروشگاه</small>
+          </span>
+        </div>
+      </header>
+
+      {% if messages %}
+        <div class="messages">
+          {% for message in messages %}
+            <div class="alert alert--{{ message.tags|default:'info' }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      {% block content %}{% endblock %}
+    </div>
+  </div>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

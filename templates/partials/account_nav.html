@@ -1,0 +1,38 @@
+<div class="account-nav">
+  <div class="account-nav__user">
+    <span class="avatar">{{ user.get_full_name|default:user.username|slice:":1" }}</span>
+    <div>
+      <div class="account-nav__name">{{ user.get_full_name|default:user.username }}</div>
+      <div class="account-nav__phone">{{ profile.phone|default:user.username }}</div>
+    </div>
+  </div>
+  <div class="account-nav__list">
+    <a class="account-nav__link {% if account_section == 'dashboard' %}is-active{% endif %}" href="{% url 'shop:account' %}">
+      <svg class="icon" aria-hidden="true"><use href="#i-grid"></use></svg>
+      داشبورد
+    </a>
+    <a class="account-nav__link {% if account_section == 'orders' %}is-active{% endif %}" href="{% url 'shop:account_orders' %}">
+      <svg class="icon" aria-hidden="true"><use href="#i-box"></use></svg>
+      سفارش‌های من
+    </a>
+    <a class="account-nav__link" href="{% url 'shop:account' %}#profile">
+      <svg class="icon" aria-hidden="true"><use href="#i-user-circle"></use></svg>
+      اطلاعات حساب
+    </a>
+    <a class="account-nav__link" href="{% url 'shop:track_order' %}">
+      <svg class="icon" aria-hidden="true"><use href="#i-search"></use></svg>
+      پیگیری سفارش
+    </a>
+    <a class="account-nav__link" href="{% url 'shop:catalog' %}">
+      <svg class="icon" aria-hidden="true"><use href="#i-cart"></use></svg>
+      ادامه خرید
+    </a>
+    <form action="{% url 'shop:logout' %}" method="post">
+      {% csrf_token %}
+      <button class="account-nav__link account-nav__link--danger" type="submit">
+        <svg class="icon" aria-hidden="true"><use href="#i-logout"></use></svg>
+        خروج از حساب
+      </button>
+    </form>
+  </div>
+</div>

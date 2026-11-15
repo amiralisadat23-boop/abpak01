@@ -1,0 +1,28 @@
+# محیط و کلیدها هرگز داخل ایمیج نمی‌روند
+.env
+.env.*
+!.env.example
+
+# پایتون و ابزارهای محلی
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+
+# دیتابیس و فایل‌های کاربر (با volume به کانتینر وصل می‌شوند)
+db.sqlite3
+db.sqlite3.bak
+media/
+media_original_backup/
+staticfiles/
+
+# گیت و فایل‌های سیستمی
+.git/
+.gitignore
+.DS_Store
+*.log
+
+# ابزارهای خود ویرایشگر/ایجنت
+.freebuff/

@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% load shop_tags %}
+
+{% block content %}
+<div class="container">
+  <div class="error-page">
+    <div class="error-page__code">۴۰۴</div>
+    <h1 class="error-page__title">این صفحه پیدا نشد</h1>
+    <p class="error-page__desc">
+      ممکن است آدرس تغییر کرده باشد یا محصول مورد نظر از فروشگاه حذف شده باشد.
+      از میان دسته‌بندی‌های تخصصی تصفیه آب، محصول مورد نظر خود را پیدا کنید.
+    </p>
+    <div class="error-page__actions">
+      <a class="btn btn--primary" href="{% url 'shop:home' %}">
+        <svg class="icon" aria-hidden="true"><use href="#i-home"></use></svg>
+        صفحه اصلی
+      </a>
+      <a class="btn btn--outline" href="{% url 'shop:catalog' %}">همه محصولات</a>
+      <a class="btn btn--ghost" href="{% url 'shop:contact' %}">تماس با پشتیبانی</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

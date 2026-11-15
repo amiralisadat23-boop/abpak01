@@ -1,0 +1,53 @@
+{% extends "panel/base.html" %}
+{% load shop_tags %}
+
+{% block content %}
+<div class="p-grid p-grid--form">
+  <div class="p-card p-form">
+    <div class="p-card__head"><h2>اقلام سفارش</h2><span class="p-muted">{{ order.items_count|fa }} عدد</span></div>
+    <div class="p-list">
+      {% for item in items %}
+        <div class="p-list__row">
+          <span>{{ item.name }}<small>{{ item.quantity|fa }} × {{ item.unit_price|price }} تومان</small></span>
+          <strong>{{ item.total_price|price }} تومان</strong>
+        </div>
+      {% endfor %}
+    </div>
+    <div class="p-summary">
+      <div><span>جمع کالاها</span><strong>{{ order.subtotal|price }} تومان</strong></div>
+      <div><span>هزینه ارسال</span><strong>{{ order.shipping_cost|price }} تومان</strong></div>
+      <div class="p-summary__total"><span>مبلغ نهایی</span><strong>{{ order.total|price }} تومان</strong></div>
+    </div>
+    <a class="btn btn--outline btn--sm btn--block" href="{{ order.get_absolute_url }}" target="_blank" rel="noopener">مشاهده صفحه سفارش در سایت</a>
+  </div>
+
+  <div>
+    <div class="p-card p-form p-form--spaced">
+      <div class="p-card__head"><h2>بروزرسانی وضعیت</h2></div>
+      <form method="post">
+        {% csrf_token %}
+        {% for field in form %}
+          <div class="field">
+            <label class="field__label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% for e in field.errors %}<span class="field__error">{{ e }}</span>{% endfor %}
+          </div>
+        {% endfor %}
+        <button class="btn btn--primary btn--block" type="submit"><svg class="icon"><use href="#i-check"></use></svg> ذخیره وضعیت</button>
+      </form>
+    </div>
+
+    <div class="p-card p-form">
+      <div class="p-card__head"><h2>اطلاعات گیرنده</h2></div>
+      <div class="p-info">
+        <div><span>نام</span><strong>{{ order.full_name }}</strong></div>
+        <div><span>تلفن</span><strong dir="ltr">{{ order.phone|fa }}</strong></div>
+        <div class="p-info__full"><span>آدرس</span><strong>{{ order.province }}، {{ order.city }}، {{ order.address }} — کد پستی {{ order.postal_code|fa }}</strong></div>
+        <div><span>روش ارسال</span><strong>{{ order.shipping_label }}</strong></div>
+        <div><span>روش پرداخت</span><strong>{{ order.payment_label }}</strong></div>
+        {% if order.note %}<div class="p-info__full"><span>یادداشت مشتری</span><strong>{{ order.note }}</strong></div>{% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
