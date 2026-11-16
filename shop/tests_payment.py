@@ -7,11 +7,10 @@
 import json
 from unittest.mock import patch
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.test import TestCase, override_settings
 from django.urls import reverse
-
-from django.conf import settings
 
 from shop.models import Category, Order, Product
 from shop.payments.base import PaymentRequestResult, PaymentVerifyResult
@@ -47,7 +46,7 @@ class PaymentFlowTests(TestCase):
 
     # ------------------------------------------------------------------ helpers
     def _start(self, authority=AUTHORITY):
-        with patch("shop.views.get_gateway") as factory:
+        with patch("shop.services.get_gateway") as factory:
             factory.return_value.slug = "zarinpal"
             factory.return_value.request_payment.return_value = PaymentRequestResult(
                 authority=authority,
@@ -56,7 +55,7 @@ class PaymentFlowTests(TestCase):
             return self.client.get(reverse("shop:payment_start", args=[self.order.code]))
 
     def _callback(self, *, status="OK", authority=AUTHORITY, verified=True, ref="123456"):
-        with patch("shop.views.get_gateway") as factory:
+        with patch("shop.services.get_gateway") as factory:
             factory.return_value.verify_payment.return_value = PaymentVerifyResult(
                 verified=verified, reference_id=ref, code=100 if verified else -50
             )
@@ -92,7 +91,7 @@ class PaymentFlowTests(TestCase):
 
     def test_callback_without_authority_changes_nothing(self):
         self._start()
-        with patch("shop.views.get_gateway") as factory:
+        with patch("shop.services.get_gateway") as factory:
             self.client.get(reverse("shop:payment_callback", args=[self.order.code]) + "?Status=OK")
             factory.assert_not_called()
         self.order.refresh_from_db()
@@ -122,7 +121,7 @@ class PaymentFlowTests(TestCase):
     def test_paid_order_does_not_start_new_transaction(self):
         self._start()
         self._callback()
-        with patch("shop.views.get_gateway") as factory:
+        with patch("shop.services.get_gateway") as factory:
             self.client.get(reverse("shop:payment_start", args=[self.order.code]))
             factory.assert_not_called()
         self.order.refresh_from_db()
@@ -153,7 +152,7 @@ class PaymentFlowTests(TestCase):
             "shipping_method": settings.DEFAULT_SHIPPING_METHOD,
             "payment_method": "online",
         }
-        with patch("shop.views.get_gateway") as factory:
+        with patch("shop.services.get_gateway") as factory:
             factory.return_value = object()
             response = self.client.post(reverse("shop:checkout"), form_data)
         self.assertEqual(response.status_code, 302)
@@ -164,7 +163,7 @@ class PaymentFlowTests(TestCase):
     def test_non_online_order_is_redirected_without_gateway(self):
         self.order.payment_method = "cod"
         self.order.save(update_fields=["payment_method"])
-        with patch("shop.views.get_gateway") as factory:
+        with patch("shop.services.get_gateway") as factory:
             response = self.client.get(reverse("shop:payment_start", args=[self.order.code]))
             factory.assert_not_called()
         self.assertEqual(response.status_code, 302)

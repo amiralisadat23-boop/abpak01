@@ -4,6 +4,8 @@
 import os
 from pathlib import Path
 
+import dj_database_url
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
@@ -94,12 +96,29 @@ TEMPLATES = [
 WSGI_APPLICATION = "config.wsgi.application"
 ASGI_APPLICATION = "config.asgi.application"
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+# ---------------------------------------------------------------------------
+# پایگاه داده
+# اتصال از متغیر DATABASE_URL خوانده می‌شود (مثلاً postgres://user:pass@host:5432/db).
+# اگر متغیر تنظیم نشده باشد، برای توسعه سریع از SQLite استفاده می‌شود؛ در
+# docker-compose مقدار آن همیشه به سرویس postgres اشاره می‌کند.
+# ---------------------------------------------------------------------------
+DATABASE_URL = os.environ.get("DATABASE_URL", "").strip()
+
+if DATABASE_URL:
+    DATABASES = {
+        "default": dj_database_url.parse(
+            DATABASE_URL,
+            conn_max_age=int(os.environ.get("DB_CONN_MAX_AGE", "600")),
+            conn_health_checks=True,
+        )
     }
-}
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
@@ -135,12 +154,22 @@ WHITENOISE_MANIFEST_STRICT = False
 # پیش‌فرض LocMemCache است (به ازای هر پروسه). برای استقرار چند-پروسه‌ای
 # می‌توانید بدون تغییر کد، بک‌اند را با متغیرهای محیطی عوض کنید (مثلا Redis).
 # ---------------------------------------------------------------------------
+# آدرس Redis مشترک (صف سلری، بک‌اند نتیجه و کش).
+# در docker-compose به redis://redis:6379/... و در اجرای مستقیم روی هاست به
+# پورت پابلیش‌شده آن اشاره می‌کند.
+REDIS_URL = os.environ.get("REDIS_URL", "").strip()
+
 CACHES = {
     "default": {
+        # با وجود REDIS_URL، کش بین همه پروسه‌ها/کانتینرها مشترک می‌شود؛
+        # در غیر این صورت LocMemCache محلی استفاده می‌شود.
         "BACKEND": os.environ.get(
-            "CACHE_BACKEND", "django.core.cache.backends.locmem.LocMemCache"
+            "CACHE_BACKEND",
+            "django_redis.cache.RedisCache"
+            if REDIS_URL
+            else "django.core.cache.backends.locmem.LocMemCache",
         ),
-        "LOCATION": os.environ.get("CACHE_LOCATION", "abpak-local"),
+        "LOCATION": os.environ.get("CACHE_LOCATION", REDIS_URL or "abpak-local"),
         "TIMEOUT": int(os.environ.get("CACHE_TIMEOUT", "900")),
     }
 }
@@ -269,7 +298,9 @@ MESSAGE_STORAGE = "django.contrib.messages.storage.session.SessionStorage"
 # آدرس بروکر با متغیرهای محیطی روی سرویس redis تنظیم می‌شود.
 # سلری فقط با اجرای worker لازم است؛ خود سایت به آن وابسته نیست.
 # ---------------------------------------------------------------------------
-CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL", "redis://127.0.0.1:6379/0")
+CELERY_BROKER_URL = os.environ.get(
+    "CELERY_BROKER_URL", REDIS_URL or "redis://127.0.0.1:6379/0"
+)
 CELERY_RESULT_BACKEND = os.environ.get("CELERY_RESULT_BACKEND", CELERY_BROKER_URL)
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
