@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 
 import dj_database_url
+from django.core.exceptions import ImproperlyConfigured
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -40,14 +41,23 @@ def env_list(name: str, default: str = "") -> list[str]:
     return [item.strip() for item in raw.split(",") if item.strip()]
 
 
+def env_bool(name: str, default: bool = False) -> bool:
+    raw = os.environ.get(name)
+    if raw is None:
+        return default
+    return raw.strip().lower() in {"1", "true", "yes", "on"}
+
+
 SECRET_KEY = os.environ.get(
     "DJANGO_SECRET_KEY",
     "django-insecure-abpak-dev-only-key-change-me-in-production-9f2c7a",
 )
 
-DEBUG = os.environ.get("DJANGO_DEBUG", "1") == "1"
+DEBUG = env_bool("DJANGO_DEBUG", default=True)
 
-ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS", "*") if DEBUG else env_list("DJANGO_ALLOWED_HOSTS")
+# فهرست دامنه‌های مجاز؛ در پروداکشن باید صریحاً در .env تنظیم شود.
+# 127.0.0.1 برای healthcheck داخلی کانتینر و اتصال مستقیم روی لوکال لازم است.
+ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1")
 
 INSTALLED_APPS = [
     "whitenoise.runserver_nostatic",
@@ -213,7 +223,6 @@ CSRF_TRUSTED_ORIGINS = [
 ] + env_list("DJANGO_CSRF_TRUSTED_ORIGINS")
 
 CSRF_COOKIE_HTTPONLY = False
-X_FRAME_OPTIONS = "SAMEORIGIN"
 
 # ---------------------------------------------------------------------------
 # تنظیمات اختصاصی فروشگاه
@@ -321,8 +330,79 @@ CELERY_BEAT_SCHEDULE = {
     },
 }
 
+# ---------------------------------------------------------------------------
+# امنیت و آمادگی استقرار
+# مقادیری که سمت مرورگر اثر دارند با متغیر محیطی قابل تغییرند تا با/بدون HTTPS
+# قابل استفاده باشند؛ مقادیر پیش‌فرض امن و سازگار با پروکسی (nginx) است.
+# ---------------------------------------------------------------------------
+# nginx هدر X-Forwarded-Proto را می‌فرستد؛ بدون آن جنگو درخواست را http می‌بیند.
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_REFERRER_POLICY = "same-origin"
+SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin"
+# سایت در iframe جاسازی نمی‌شود؛ DENY جلوی clickjacking را کامل می‌گیرد.
+X_FRAME_OPTIONS = "DENY"
+
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = "Lax"
+CSRF_COOKIE_SAMESITE = "Lax"
+
+# کوکی‌های امن فقط روی HTTPS کار می‌کنند؛ در پروداکشن به‌صورت پیش‌فرض روشن‌اند.
+SESSION_COOKIE_SECURE = env_bool("DJANGO_SESSION_COOKIE_SECURE", default=not DEBUG)
+CSRF_COOKIE_SECURE = env_bool("DJANGO_CSRF_COOKIE_SECURE", default=not DEBUG)
+
+# ریدایرکت HTTPS و HSTS پیش‌فرض خاموش است تا استقرار بدون گواهی تولید را
+# قفل نکند؛ بعد از تنظیم TLS مقدارها را روشن کنید (HSTS: 31536000).
+SECURE_SSL_REDIRECT = env_bool("DJANGO_SECURE_SSL_REDIRECT", default=False)
+SECURE_HSTS_SECONDS = int(os.environ.get("DJANGO_SECURE_HSTS_SECONDS", "0"))
+SECURE_HSTS_INCLUDE_SUBDOMAINS = env_bool(
+    "DJANGO_SECURE_HSTS_INCLUDE_SUBDOMAINS", default=SECURE_HSTS_SECONDS > 0
+)
+SECURE_HSTS_PRELOAD = env_bool("DJANGO_HSTS_PRELOAD", default=False)
+
+# سرو فایل‌های آپلودی (/media) توسط جنگو فقط وقتی پروکسی/سرور وب جداگانه‌ای
+# برای media تنظیم نشده باشد. در ترافیک بالا آن را به nginx/CDN بسپارید.
+SERVE_MEDIA = env_bool("DJANGO_SERVE_MEDIA", default=False)
+
+# ---------------------------------------------------------------------------
+# کنترل‌های سخت‌گیرانه پروداکشن: پیکربندی ناقص باید در استارتاپ خطا بدهد،
+# نه اینکه بی‌صدا با کلید ناامن یا SQLite بالا بیاید.
+# ---------------------------------------------------------------------------
 if not DEBUG:
-    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
-    SECURE_CONTENT_TYPE_NOSNIFF = True
+    if SECRET_KEY.startswith("django-insecure") or len(SECRET_KEY) < 40:
+        raise ImproperlyConfigured(
+            "در حالت پروداکشن DJANGO_SECRET_KEY قوی و تصادفی لازم است "
+            "(python -c \"from django.core.management.utils import get_random_secret_key as k; print(k())\")."
+        )
+    if not os.environ.get("DJANGO_ALLOWED_HOSTS"):
+        raise ImproperlyConfigured(
+            "در حالت پروداکشن DJANGO_ALLOWED_HOSTS را تنظیم کنید (مثلاً example.com,www.example.com)."
+        )
+    if not DATABASE_URL:
+        raise ImproperlyConfigured("در حالت پروداکشن DATABASE_URL (PostgreSQL) الزامی است.")
+
+# ---------------------------------------------------------------------------
+# لاگ: همه چیز روی stdout/stderr تا در `docker compose logs` دیده شود
+# ---------------------------------------------------------------------------
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "standard": {
+            "format": "[{asctime}] {levelname} {name}: {message}",
+            "datefmt": "%Y-%m-%d %H:%M:%S",
+            "style": "{",
+        }
+    },
+    "handlers": {
+        "console": {"class": "logging.StreamHandler", "formatter": "standard"},
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": os.environ.get("DJANGO_LOG_LEVEL", "INFO"),
+    },
+    "loggers": {
+        "django.request": {"handlers": ["console"], "level": "ERROR", "propagate": False},
+        "django.security": {"handlers": ["console"], "level": "WARNING", "propagate": False},
+    },
+}

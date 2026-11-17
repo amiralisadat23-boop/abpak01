@@ -1,19 +1,22 @@
 # =============================================================================
-# آب پاک | ABPAK — استک اجرای پروژه
-#   web      : جنگو با gunicorn (پورت 8000)
-#   postgres : پایگاه داده اصلی
-#   redis    : بروکر/بک‌اند سلری و کش مشترک بین پروسه‌ها
+# آب پاک | ABPAK — استک اجرای پروژه (آماده استقرار)
+#   web      : جنگو با gunicorn (پورت 8000 فقط روی loopback)
+#   postgres : پایگاه داده اصلی (فقط loopback)
+#   redis    : بروکر/بک‌اند سلری و کش مشترک (فقط loopback)
 #   worker   : سلری ورکر برای تسک‌های پس‌زمینه
 #   beat     : سلری بیت برای اجرای زمان‌بندی‌شده تسک‌ها
 #
-# اجرا:  docker compose up -d --build
-# لاگ:   docker compose logs -f web worker beat
-# تست:   docker compose exec web python manage.py test
+# استقرار:  cp .env.production.example .env  → مقادیر واقعی → docker compose up -d --build
+# لاگ:      docker compose logs -f web worker beat
+# تست:      docker compose exec web python manage.py test
+#
+# نکته TLS/پروکسی: این استک پورت 8000 را فقط روی 127.0.0.1 باز می‌کند؛ برای
+# دامنه و HTTPS یک پروکسی معکوس روی هاست (nginx/caddy) یا Cloudflare بگذارید:
+#   proxy_set_header X-Forwarded-Proto $scheme;  proxy_set_header Host $host;
 # =============================================================================
 
-# تنظیمات مشترک اپلیکیشن (سرویس‌های وب، ورکر و بیت).
-# آدرس‌های داخلی شبکه داکر با نام سرویس‌ها تنظیم می‌شوند و بر مقادیر .env
-# (که برای اجرای مستقیم روی هاست است) اولویت دارند.
+# تنظیمات مشترک اپلیکیشن (وب، ورکر و بیت).
+# آدرس‌های داخلی شبکه داکر با نام سرویس‌ها ست می‌شوند و بر .env اولویت دارند.
 x-app-environment: &app-environment
   DATABASE_URL: postgres://${POSTGRES_USER:-abpak}:${POSTGRES_PASSWORD:-abpak}@postgres:5432/${POSTGRES_DB:-abpak}
   REDIS_URL: redis://redis:6379/0
@@ -32,11 +35,11 @@ services:
     environment:
       <<: *app-environment
       RUN_SETUP: "1"
-      DJANGO_ALLOWED_HOSTS: "*"
     volumes:
       - ./media:/app/media
+    # فقط از روی خود سرور قابل دسترسی است؛ ترافیک عمومی از پروکسی می‌آید
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
     depends_on:
       postgres:
         condition: service_healthy
@@ -47,7 +50,7 @@ services:
         - "CMD"
         - "python"
         - "-c"
-        - "import urllib.request, sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/').status == 200 else 1)"
+        - "import urllib.request as u; r = u.Request('http://127.0.0.1:8000/', headers={'Host': '127.0.0.1'}); u.urlopen(r, timeout=5).read()"
       interval: 30s
       timeout: 5s
       retries: 5
@@ -61,13 +64,12 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-abpak}
       POSTGRES_USER: ${POSTGRES_USER:-abpak}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-abpak}
-      # مقایسه/مرتب‌سازی فارسی و ترتیب حروف در ORDER BY
       POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C.UTF-8"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      # پورت ۵۴۳۲/۵۴۳۳ روی این سیستم در حال استفاده بود؛ ۵۴۳۴ برای اجرای محلی
-      - "5434:5432"
+      # فقط برای اجرای manage.py روی هاست؛ از بیرون قابل دسترسی نیست
+      - "127.0.0.1:5434:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-abpak} -d ${POSTGRES_DB:-abpak}"]
       interval: 10s
@@ -83,8 +85,7 @@ services:
     volumes:
       - redis_data:/data
     ports:
-      # پورت ۶۳۷۹ روی هاست اشغال بود؛ ۶۳۸۰ برای اجرای محلی (celery/کش روی هاست)
-      - "6380:6379"
+      - "127.0.0.1:6380:6379"
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s

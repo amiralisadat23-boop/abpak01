@@ -18,3 +18,5 @@ db.sqlite3.bak
 # فایل‌های محیطی و محرمانه (فقط نمونه قابل انتشار است)
 .env.*
 !.env.example
+
+!.env.production.example
